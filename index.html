@@ -181,6 +181,7 @@
        <!-- Tab Menu Admin -->
        <div class="flex bg-slate-200 p-1 rounded-2xl overflow-x-auto gap-1">
           <button onclick="pilihTabAdmin('admin-soal')" id="tab-adm-soal" class="flex-1 py-3 text-center text-xs font-black rounded-xl bg-white text-indigo-600 shadow whitespace-nowrap px-4">📝 INPUT / EDIT SOAL</button>
+          <button onclick="pilihTabAdmin('admin-dbsoal')" id="tab-adm-dbsoal" class="flex-1 py-3 text-center text-xs font-black rounded-xl text-slate-600 hover:text-slate-950 whitespace-nowrap px-4">🗃️ DATABASE SOAL</button>
           <button onclick="pilihTabAdmin('admin-import')" id="tab-adm-import" class="flex-1 py-3 text-center text-xs font-black rounded-xl text-slate-600 hover:text-slate-950 whitespace-nowrap px-4">📥 IMPORT EXCEL/CSV</button>
           <button onclick="pilihTabAdmin('admin-materi')" id="tab-adm-materi" class="flex-1 py-3 text-center text-xs font-black rounded-xl text-slate-600 hover:text-slate-950 whitespace-nowrap px-4">📖 MATERI PRO</button>
           <button onclick="pilihTabAdmin('admin-informasi')" id="tab-adm-informasi" class="flex-1 py-3 text-center text-xs font-black rounded-xl text-slate-600 hover:text-slate-950 whitespace-nowrap px-4">🔔 INFORMASI</button>
@@ -275,44 +276,94 @@
                    <input type="text" id="adm-soal-rules" required class="w-full px-4 py-3 bg-slate-50 border rounded-2xl text-sm uppercase" maxlength="1" placeholder="Contoh: A">
                 </div>
                 <div>
-                   <label class="block text-[10px] font-black text-slate-400 uppercase mb-1">Pembahasan Soal</label>
+                   <label class="block text-[10px] font-black text-slate-400 uppercase mb-1">Pembahasan Soal (Teks)</label>
                    <textarea id="adm-soal-pembahasan" rows="2" class="w-full px-4 py-3 bg-slate-50 border rounded-2xl text-sm" placeholder="Teks pembahasan..."></textarea>
+                </div>
+             </div>
+
+             <!-- MEDIA PEMBAHASAN TAMBAHAN (FOTO & VIDEO YOUTUBE DETIK) -->
+             <div class="p-4 bg-indigo-50/50 border border-indigo-100 rounded-2xl space-y-4">
+                <p class="text-xs font-black text-indigo-900 uppercase">🎬 Upload Foto & Media Pembahasan Video (Opsional)</p>
+                
+                <div>
+                   <label class="block text-[10px] font-bold text-slate-500 uppercase mb-1">Upload Foto Pembahasan</label>
+                   <input type="file" id="adm-soal-pembahasan-img-file" accept="image/*" class="w-full px-3 py-1.5 bg-white border rounded-xl text-xs text-slate-600">
+                   <input type="hidden" id="adm-soal-pembahasan-img-old" value="">
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
+                   <div class="md:col-span-3">
+                      <label class="block text-[10px] font-bold text-slate-500 uppercase mb-1">Link URL Video YouTube</label>
+                      <input type="url" id="adm-soal-yt-link" class="w-full px-3 py-2 bg-white border rounded-xl text-xs" placeholder="https://www.youtube.com/watch?v=XXXXXX atau https://youtu.be/XXXXXX">
+                   </div>
+                   <div>
+                      <label class="block text-[10px] font-bold text-slate-500 uppercase mb-1">Mulai Detik Ke- (Start)</label>
+                      <input type="number" id="adm-soal-yt-start" min="0" class="w-full px-3 py-2 bg-white border rounded-xl text-xs" placeholder="Contoh: 50">
+                   </div>
+                   <div>
+                      <label class="block text-[10px] font-bold text-slate-500 uppercase mb-1">Selesai Detik Ke- (End)</label>
+                      <input type="number" id="adm-soal-yt-end" min="0" class="w-full px-3 py-2 bg-white border rounded-xl text-xs" placeholder="Contoh: 100">
+                   </div>
                 </div>
              </div>
 
              <button id="btn-submit-soal" type="submit" class="w-full py-3.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-2xl font-black text-xs shadow-md">SIMPAN SOAL KE FIREBASE</button>
           </form>
+       </div>
 
-          <!-- TABEL DAFTAR SOAL TERSEDIA (EDIT, CEKLIS & HAPUS BANYAK) -->
-          <div class="pt-6 border-t border-slate-200 space-y-4">
-             <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
-                <h4 class="font-black text-sm text-slate-800">Daftar Soal Tersimpan di Database</h4>
-                <div class="flex items-center gap-2">
-                   <button onclick="window.adminHapusSoalTerpilih()" id="btn-hapus-terpilih" class="hidden px-3 py-1 bg-red-600 text-white font-bold text-xs rounded-lg hover:bg-red-700 shadow-sm transition">
-                      🗑️ Hapus Terpilih (<span id="jumlah-terceklis">0</span>)
-                   </button>
-                   <button onclick="adminLoadDaftarSoal()" class="px-3 py-1 bg-indigo-50 text-indigo-600 font-bold text-xs rounded-lg hover:bg-indigo-100 transition">🔄 Refresh Daftar Soal</button>
-                </div>
+       <!-- TAB BARU: DATABASE SOAL (DENGAN FILTER GROUPING) -->
+       <div id="panel-admin-dbsoal" class="bg-white p-6 sm:p-8 rounded-3xl border border-slate-200 shadow-sm space-y-6 hidden">
+          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b pb-4">
+             <div>
+                <h3 class="text-base font-black text-slate-800">Database Soal Tersimpan</h3>
+                <p class="text-xs text-slate-400 mt-0.5">Filter dan kelompokkan data soal berdasarkan Jenis dan Paket Soal.</p>
              </div>
-             <div class="overflow-x-auto">
-                <table class="w-full text-left text-xs text-slate-600">
-                   <thead>
-                      <tr class="bg-slate-100 text-slate-500 uppercase text-[10px] font-black">
-                         <th class="py-3 px-3 text-center w-10">
-                            <input type="checkbox" id="chk-pilih-semua" onchange="window.togglePilihSemuaSoal(this)" class="w-4 h-4 rounded text-indigo-600 focus:ring-indigo-500 cursor-pointer">
-                         </th>
-                         <th class="py-3 px-3">Jenis</th>
-                         <th class="py-3 px-3">Paket</th>
-                         <th class="py-3 px-3">Teks Pertanyaan Soal</th>
-                         <th class="py-3 px-3">Kunci</th>
-                         <th class="py-3 px-3 text-center">Aksi</th>
-                      </tr>
-                   </thead>
-                   <tbody id="adm-tabel-soal-body" class="divide-y">
-                      <tr><td colspan="6" class="py-4 text-center text-slate-400">Klik refresh untuk menampilkan daftar soal...</td></tr>
-                   </tbody>
-                </table>
+             <div class="flex items-center gap-2">
+                <button onclick="window.adminHapusSoalTerpilih()" id="btn-hapus-terpilih" class="hidden px-3 py-1.5 bg-red-600 text-white font-bold text-xs rounded-xl hover:bg-red-700 shadow-sm transition">
+                   🗑️ Hapus Terpilih (<span id="jumlah-terceklis">0</span>)
+                </button>
+                <button onclick="adminLoadDaftarSoal()" class="px-3 py-1.5 bg-indigo-50 text-indigo-600 font-bold text-xs rounded-xl hover:bg-indigo-100 transition">🔄 Refresh Database</button>
              </div>
+          </div>
+
+          <!-- KELOMPOK FILTER (GROUPING) -->
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4 bg-slate-50 p-4 rounded-2xl border">
+             <div>
+                <label class="block text-[10px] font-black text-slate-400 uppercase mb-1">Filter Jenis / Kategori</label>
+                <select id="filter-db-jenis" onchange="window.filterDatabaseSoal()" class="w-full px-3 py-2.5 bg-white border rounded-xl text-xs font-bold text-slate-700">
+                   <option value="SEMUA">-- Semua Jenis --</option>
+                   <option value="latihan">Latihan Mandiri</option>
+                   <option value="ujian">Paket Ujian Simulasi</option>
+                </select>
+             </div>
+             <div>
+                <label class="block text-[10px] font-black text-slate-400 uppercase mb-1">Filter Paket Soal</label>
+                <select id="filter-db-paket" onchange="window.filterDatabaseSoal()" class="w-full px-3 py-2.5 bg-white border rounded-xl text-xs font-bold text-slate-700">
+                   <option value="SEMUA">-- Semua Paket --</option>
+                </select>
+             </div>
+          </div>
+
+          <!-- TABEL SOAL -->
+          <div class="overflow-x-auto">
+             <table class="w-full text-left text-xs text-slate-600">
+                <thead>
+                   <tr class="bg-slate-100 text-slate-500 uppercase text-[10px] font-black">
+                      <th class="py-3 px-3 text-center w-10">
+                         <input type="checkbox" id="chk-pilih-semua" onchange="window.togglePilihSemuaSoal(this)" class="w-4 h-4 rounded text-indigo-600 focus:ring-indigo-500 cursor-pointer">
+                      </th>
+                      <th class="py-3 px-3">Jenis</th>
+                      <th class="py-3 px-3">Paket</th>
+                      <th class="py-3 px-3">Teks Pertanyaan Soal</th>
+                      <th class="py-3 px-3">Media Pembahasan</th>
+                      <th class="py-3 px-3">Kunci</th>
+                      <th class="py-3 px-3 text-center">Aksi</th>
+                   </tr>
+                </thead>
+                <tbody id="adm-tabel-soal-body" class="divide-y">
+                   <tr><td colspan="7" class="py-4 text-center text-slate-400">Klik refresh untuk menampilkan daftar soal...</td></tr>
+                </tbody>
+             </table>
           </div>
        </div>
 
@@ -447,9 +498,10 @@
              <div class="space-y-3 pt-2" id="latihan-list-opsi"></div>
 
              <!-- PEMBAHASAN MODE MANDIRI -->
-             <div id="latihan-blok-pembahasan" class="hidden bg-indigo-50/70 border border-indigo-200 p-5 rounded-2xl space-y-2">
+             <div id="latihan-blok-pembahasan" class="hidden bg-indigo-50/70 border border-indigo-200 p-5 rounded-2xl space-y-3">
                 <h4 class="font-black text-xs text-indigo-950 uppercase">💡 Kunci Jawaban & Pembahasan</h4>
                 <p id="latihan-teks-pembahasan" class="text-xs text-indigo-900 leading-relaxed whitespace-pre-line"></p>
+                <div id="latihan-media-pembahasan" class="space-y-3 pt-2"></div>
              </div>
 
              <!-- TOMBOL NAVIGASI DUA ARAH -->
@@ -651,6 +703,14 @@
       return arr;
     }
 
+    // FUNGSI HELPER EXTRACT ID YOUTUBE
+    function getYoutubeId(url) {
+      if(!url) return null;
+      const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=)([^#\&\?]*).*/;
+      const match = url.match(regExp);
+      return (match && match[2].length === 11) ? match[2] : null;
+    }
+
     // FUNGSI HELPER TANGGAL LOKAL (Format YYYY-MM-DD)
     function getTodayString() {
       const d = new Date();
@@ -740,15 +800,24 @@
 
     // TAB ADMIN HANDLER
     window.pilihTabAdmin = function(tabName) {
-      const panels = ['admin-soal', 'admin-import', 'admin-materi', 'admin-informasi', 'admin-peserta'];
+      const panels = ['admin-soal', 'admin-dbsoal', 'admin-import', 'admin-materi', 'admin-informasi', 'admin-peserta'];
       panels.forEach(p => {
         document.getElementById(`panel-${p}`).classList.add('hidden');
+        const tabBtn = document.getElementById(`tab-adm-${p.replace('admin-', '')}`);
+        if(tabBtn) {
+          tabBtn.className = "flex-1 py-3 text-center text-xs font-black rounded-xl text-slate-600 hover:text-slate-950 whitespace-nowrap px-4";
+        }
       });
+
       document.getElementById(`panel-${tabName}`).classList.remove('hidden');
+      const activeBtn = document.getElementById(`tab-adm-${tabName.replace('admin-', '')}`);
+      if(activeBtn) {
+        activeBtn.className = "flex-1 py-3 text-center text-xs font-black rounded-xl bg-white text-indigo-600 shadow whitespace-nowrap px-4";
+      }
 
       if(tabName === 'admin-peserta') {
         window.adminLoadDaftarPeserta();
-      } else if(tabName === 'admin-soal') {
+      } else if(tabName === 'admin-soal' || tabName === 'admin-dbsoal') {
         window.adminLoadDaftarSoal();
       }
     };
@@ -767,6 +836,9 @@
         const newImgC = await convertFileToBase64("adm-soal-img-c-file");
         const newImgD = await convertFileToBase64("adm-soal-img-d-file");
         const newImgE = await convertFileToBase64("adm-soal-img-e-file");
+
+        // Media Pembahasan Tambahan
+        const newImgPembahasan = await convertFileToBase64("adm-soal-pembahasan-img-file");
 
         const payload = {
           jenis: document.getElementById("adm-soal-jenis").value,
@@ -791,6 +863,13 @@
           
           jawaban: document.getElementById("adm-soal-rules").value.toUpperCase(),
           pembahasan: document.getElementById("adm-soal-pembahasan").value || "",
+          
+          // Media Pembahasan Tambahan
+          img_pembahasan: newImgPembahasan || document.getElementById("adm-soal-pembahasan-img-old").value || "",
+          yt_link: document.getElementById("adm-soal-yt-link").value.trim(),
+          yt_start: parseInt(document.getElementById("adm-soal-yt-start").value) || 0,
+          yt_end: parseInt(document.getElementById("adm-soal-yt-end").value) || 0,
+
           updatedAt: new Date().toISOString()
         };
 
@@ -816,7 +895,7 @@
     // LOAD DAFTAR SOAL UNTUK ADMIN EDIT / HAPUS / BULK DELETE
     window.adminLoadDaftarSoal = async function() {
       const tbody = document.getElementById("adm-tabel-soal-body");
-      tbody.innerHTML = `<tr><td colspan="6" class="py-4 text-center">Memuat daftar soal...</td></tr>`;
+      tbody.innerHTML = `<tr><td colspan="7" class="py-4 text-center">Memuat database soal...</td></tr>`;
 
       // Reset checkbox header & tombol hapus terpilih
       const chkHeader = document.getElementById("chk-pilih-semua");
@@ -825,36 +904,84 @@
 
       try {
         const snap = await getDocs(collection(db, "soal"));
-        tbody.innerHTML = "";
         window.semuaSoalCache = [];
 
         if(snap.empty) {
-          tbody.innerHTML = `<tr><td colspan="6" class="py-4 text-center text-slate-400">Belum ada soal di database.</td></tr>`;
+          tbody.innerHTML = `<tr><td colspan="7" class="py-4 text-center text-slate-400">Belum ada soal di database.</td></tr>`;
           return;
         }
+
+        const paketSet = new Set();
 
         snap.forEach(d => {
           const item = { id: d.id, ...d.data() };
           window.semuaSoalCache.push(item);
-
-          tbody.innerHTML += `
-            <tr class="hover:bg-slate-50 border-b">
-              <td class="py-3 px-3 text-center">
-                 <input type="checkbox" value="${item.id}" onchange="window.updateTombolHapusTerpilih()" class="chk-soal-item w-4 h-4 rounded text-indigo-600 focus:ring-indigo-500 cursor-pointer">
-              </td>
-              <td class="py-3 px-3 uppercase text-[10px] font-black">${item.jenis || 'latihan'}</td>
-              <td class="py-3 px-3 font-bold text-indigo-900">${item.paket || 'TANPA PAKET'}</td>
-              <td class="py-3 px-3 truncate max-w-xs">${item.soal}</td>
-              <td class="py-3 px-3 font-black text-emerald-600">${item.jawaban}</td>
-              <td class="py-3 px-3 text-center space-x-2">
-                 <button onclick="window.persiapkanEditSoal('${item.id}')" class="px-2.5 py-1 bg-amber-500 text-white rounded-lg text-[10px] font-bold hover:bg-amber-600 transition">Edit</button>
-                 <button onclick="window.hapusSoal('${item.id}')" class="px-2.5 py-1 bg-red-600 text-white rounded-lg text-[10px] font-bold hover:bg-red-700 transition">Hapus</button>
-              </td>
-            </tr>`;
+          if(item.paket) paketSet.add(item.paket);
         });
+
+        // Update Dropdown Filter Paket
+        const selectPaket = document.getElementById("filter-db-paket");
+        if(selectPaket) {
+          const curVal = selectPaket.value;
+          selectPaket.innerHTML = `<option value="SEMUA">-- Semua Paket --</option>`;
+          paketSet.forEach(p => {
+            selectPaket.innerHTML += `<option value="${p}">${p}</option>`;
+          });
+          selectPaket.value = curVal;
+        }
+
+        window.renderTabelDatabaseSoal(window.semuaSoalCache);
       } catch(e) {
-        tbody.innerHTML = `<tr><td colspan="6" class="py-4 text-center text-red-500">${e.message}</td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="7" class="py-4 text-center text-red-500">${e.message}</td></tr>`;
       }
+    };
+
+    // RENDER TABEL DATABASE BERDASARKAN FILTER GROUPING
+    window.renderTabelDatabaseSoal = function(dataList) {
+      const tbody = document.getElementById("adm-tabel-soal-body");
+      tbody.innerHTML = "";
+
+      if(!dataList || dataList.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="7" class="py-4 text-center text-slate-400">Tidak ada soal yang sesuai filter.</td></tr>`;
+        return;
+      }
+
+      dataList.forEach(item => {
+        let mediaText = [];
+        if(item.img_pembahasan) mediaText.push("🖼️ Foto");
+        if(item.yt_link) mediaText.push(`🎥 Video (${item.yt_start||0}s - ${item.yt_end||0}s)`);
+        const mediaTag = mediaText.length > 0 ? mediaText.join("<br>") : "<span class='text-slate-300'>Teks saja</span>";
+
+        tbody.innerHTML += `
+          <tr class="hover:bg-slate-50 border-b">
+            <td class="py-3 px-3 text-center">
+               <input type="checkbox" value="${item.id}" onchange="window.updateTombolHapusTerpilih()" class="chk-soal-item w-4 h-4 rounded text-indigo-600 focus:ring-indigo-500 cursor-pointer">
+            </td>
+            <td class="py-3 px-3 uppercase text-[10px] font-black">${item.jenis || 'latihan'}</td>
+            <td class="py-3 px-3 font-bold text-indigo-900">${item.paket || 'TANPA PAKET'}</td>
+            <td class="py-3 px-3 truncate max-w-xs">${item.soal}</td>
+            <td class="py-3 px-3 text-[10px] font-medium text-slate-500">${mediaTag}</td>
+            <td class="py-3 px-3 font-black text-emerald-600">${item.jawaban}</td>
+            <td class="py-3 px-3 text-center space-x-2">
+               <button onclick="window.persiapkanEditSoal('${item.id}')" class="px-2.5 py-1 bg-amber-500 text-white rounded-lg text-[10px] font-bold hover:bg-amber-600 transition">Edit</button>
+               <button onclick="window.hapusSoal('${item.id}')" class="px-2.5 py-1 bg-red-600 text-white rounded-lg text-[10px] font-bold hover:bg-red-700 transition">Hapus</button>
+            </td>
+          </tr>`;
+      });
+    };
+
+    // FILTER DATABASE SOAL BERDASARKAN JENIS DAN PAKET
+    window.filterDatabaseSoal = function() {
+      const fJenis = document.getElementById("filter-db-jenis").value;
+      const fPaket = document.getElementById("filter-db-paket").value;
+
+      let filtered = window.semuaSoalCache.filter(item => {
+        const matchJenis = (fJenis === "SEMUA") || ((item.jenis || "latihan") === fJenis);
+        const matchPaket = (fPaket === "SEMUA") || ((item.paket || "") === fPaket);
+        return matchJenis && matchPaket;
+      });
+
+      window.renderTabelDatabaseSoal(filtered);
     };
 
     // FITUR CEKLIS SEMUA SOAL
@@ -936,10 +1063,17 @@
       document.getElementById("adm-soal-rules").value = target.jawaban || "A";
       document.getElementById("adm-soal-pembahasan").value = target.pembahasan || "";
 
+      // Media Pembahasan Tambahan
+      document.getElementById("adm-soal-pembahasan-img-old").value = target.img_pembahasan || "";
+      document.getElementById("adm-soal-yt-link").value = target.yt_link || "";
+      document.getElementById("adm-soal-yt-start").value = target.yt_start || 0;
+      document.getElementById("adm-soal-yt-end").value = target.yt_end || 0;
+
       document.getElementById("adm-soal-form-title").innerText = "Edit Soal (Mode Perubahan)";
       document.getElementById("btn-submit-soal").innerText = "SIMPAN PERUBAHAN SOAL";
       document.getElementById("btn-batal-edit").classList.remove("hidden");
 
+      window.pilihTabAdmin("admin-soal");
       window.scrollTo({ top: 0, behavior: 'smooth' });
     };
 
@@ -952,6 +1086,8 @@
       document.getElementById("adm-soal-img-c-old").value = "";
       document.getElementById("adm-soal-img-d-old").value = "";
       document.getElementById("adm-soal-img-e-old").value = "";
+
+      document.getElementById("adm-soal-pembahasan-img-old").value = "";
 
       document.getElementById("adm-soal-form-title").innerText = "Tambah Soal Baru";
       document.getElementById("btn-submit-soal").innerText = "SIMPAN SOAL KE FIREBASE";
@@ -1074,6 +1210,10 @@
               opsi_e: valOpsiE, img_e: "",
               jawaban: valJawaban,
               pembahasan: valPembahasan,
+              img_pembahasan: "",
+              yt_link: "",
+              yt_start: 0,
+              yt_end: 0,
               createdAt: new Date().toISOString()
             });
           }
@@ -1441,6 +1581,29 @@
       });
 
       document.getElementById("latihan-teks-pembahasan").innerText = `Jawaban Anda: ${jwbUser || 'Tidak Diisi'}\nKunci Jawaban: ${kunci}\n\nPembahasan:\n${s.pembahasan || 'Tidak ada pembahasan khusus untuk soal ini.'}`;
+      
+      // Render Foto & Video Pembahasan (Hanya Menampilkan Sesuai Durasi Detik Yang Dipilih)
+      const mediaBox = document.getElementById("latihan-media-pembahasan");
+      mediaBox.innerHTML = "";
+
+      if(s.img_pembahasan) {
+        mediaBox.innerHTML += `<div class="rounded-xl overflow-hidden border bg-white p-2 text-center">
+          <img src="${s.img_pembahasan}" class="max-h-64 object-contain mx-auto rounded-lg" alt="Foto Pembahasan">
+        </div>`;
+      }
+
+      if(s.yt_link) {
+        const ytId = getYoutubeId(s.yt_link);
+        if(ytId) {
+          const start = s.yt_start || 0;
+          const end = s.yt_end ? `&end=${s.yt_end}` : "";
+          const embedUrl = `https://www.youtube.com/embed/${ytId}?start=${start}${end}&autoplay=1`;
+          mediaBox.innerHTML += `<div class="aspect-video w-full rounded-2xl overflow-hidden border shadow-sm">
+            <iframe class="w-full h-full" src="${embedUrl}" title="Video Pembahasan" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+          </div>`;
+        }
+      }
+
       document.getElementById("latihan-blok-pembahasan").classList.remove("hidden");
     };
 
@@ -1565,6 +1728,26 @@
           }
         });
 
+        // Media Pembahasan Tambahan (Gambar & Youtube Trim)
+        let mediaPembahasanHtml = "";
+        if(s.img_pembahasan) {
+          mediaPembahasanHtml += `<div class="rounded-xl overflow-hidden border bg-white p-2 text-center mt-3">
+            <img src="${s.img_pembahasan}" class="max-h-64 object-contain mx-auto rounded-lg" alt="Foto Pembahasan">
+          </div>`;
+        }
+
+        if(s.yt_link) {
+          const ytId = getYoutubeId(s.yt_link);
+          if(ytId) {
+            const start = s.yt_start || 0;
+            const end = s.yt_end ? `&end=${s.yt_end}` : "";
+            const embedUrl = `https://www.youtube.com/embed/${ytId}?start=${start}${end}`;
+            mediaPembahasanHtml += `<div class="aspect-video w-full rounded-2xl overflow-hidden border shadow-sm mt-3">
+              <iframe class="w-full h-full" src="${embedUrl}" title="Video Pembahasan" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+            </div>`;
+          }
+        }
+
         // HTML untuk Per Soal di Pembahasan
         container.innerHTML += `
           <div class="bg-white rounded-3xl border border-slate-200 p-6 sm:p-8 space-y-4 shadow-sm">
@@ -1587,6 +1770,7 @@
              <div class="bg-indigo-50 border border-indigo-200 p-4 rounded-2xl space-y-1.5 mt-4">
                 <p class="text-xs font-black text-indigo-950 uppercase">💡 Kunci & Pembahasan Soal:</p>
                 <p class="text-xs text-indigo-900 leading-relaxed whitespace-pre-line"><b>Kunci Jawaban: ${kunci}</b> (Jawaban Anda: ${jwbUser})\n\n${s.pembahasan || 'Tidak ada pembahasan khusus untuk soal ini.'}</p>
+                ${mediaPembahasanHtml}
              </div>
           </div>`;
       });
