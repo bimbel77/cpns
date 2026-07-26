@@ -566,7 +566,7 @@
           <button onclick="tutupModalUpgrade()" class="absolute top-4 right-4 text-slate-400 font-bold text-xl">&times;</button>
           <div class="w-16 h-16 bg-amber-50 text-amber-500 rounded-full flex items-center justify-center mx-auto text-3xl">⭐</div>
           <h4 class="text-xl font-black text-slate-800">Aktifkan Keanggotaan PRO</h4>
-          <p class="text-xs text-slate-400">Akses seluruh materi eksklusif dan bank latihan soal lengkap.</p>
+          <p class="text-xs text-slate-400">Akses seluruh materi eksklusif, simulasi ujian lengkap, dan bank latihan soal tanpa batas harian.</p>
           <a href="http://lynk.id/seputar_guru/d5go6kmmg2yn" target="_blank" class="block w-full py-3.5 bg-indigo-600 text-white rounded-2xl font-black text-xs uppercase">UPGRADE SEKARANG &rarr;</a>
        </div>
     </div>
@@ -640,6 +640,25 @@
         }
       });
     };
+
+    // FUNGSI UTILITAS: ACAK ARRAY (Fisher-Yates Shuffle)
+    function shuffleArray(array) {
+      const arr = [...array];
+      for (let i = arr.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [arr[i], arr[j]] = [arr[j], arr[i]];
+      }
+      return arr;
+    }
+
+    // FUNGSI HELPER TANGGAL LOKAL (Format YYYY-MM-DD)
+    function getTodayString() {
+      const d = new Date();
+      const year = d.getFullYear();
+      const month = String(d.getMonth() + 1).padStart(2, '0');
+      const day = String(d.getDate()).padStart(2, '0');
+      return `${year}-${month}-${day}`;
+    }
 
     // AUTH OBSERVER
     onAuthStateChanged(auth, async (user) => {
@@ -970,7 +989,7 @@
         },
         {
           jenis: "ujian",
-          paket: "SIMULASI CAT PAKET A",
+          paket: "SIMULASI CAT PAKET A (GRATIS)",
           soal: "Berapakah hasil dari 15 x 12?",
           opsi_a: "150",
           opsi_b: "170",
@@ -1103,14 +1122,36 @@
                <p class="text-xs text-slate-400">Silakan tanyakan kepada admin untuk penginputan paket soal.</p>
             </div>`;
         } else {
+          const isUserPro = window.uAktif && window.uAktif.tipe === "pro";
+
           keys.forEach(paketName => {
             const jumlahSoal = paketMap[paketName].length;
+            const isGratisPaket = /GRATIS|FREE/i.test(paketName);
+
+            let tagAkses = "";
+            let infoJumlahText = `Terdiri dari <b>${jumlahSoal}</b> butir soal.`;
+
+            if(mode === "ujian") {
+              if (isGratisPaket) {
+                tagAkses = `<span class="px-2 py-0.5 bg-emerald-100 text-emerald-800 rounded-lg text-[9px] font-black uppercase">PAKET GRATIS</span>`;
+              } else {
+                tagAkses = `<span class="px-2 py-0.5 bg-amber-100 text-amber-800 rounded-lg text-[9px] font-black uppercase">PRO ONLY</span>`;
+              }
+            } else if(mode === "latihan") {
+              if(!isUserPro) {
+                infoJumlahText = `Tersedia <b>10 Soal Acak / Hari</b> (Total bank soal: ${jumlahSoal})`;
+              }
+            }
+
             listContainer.innerHTML += `
               <div class="bg-white p-6 rounded-3xl border border-slate-200 hover:border-indigo-500 shadow-sm transition space-y-4 flex flex-col justify-between">
                  <div class="space-y-1">
-                    <span class="px-2.5 py-1 bg-indigo-50 text-indigo-600 rounded-lg text-[10px] font-black uppercase">${mode === 'ujian' ? 'SIMULASI UJIAN' : 'LATIHAN MANDIRI'}</span>
+                    <div class="flex items-center justify-between gap-2">
+                      <span class="px-2.5 py-1 bg-indigo-50 text-indigo-600 rounded-lg text-[10px] font-black uppercase">${mode === 'ujian' ? 'SIMULASI UJIAN' : 'LATIHAN MANDIRI'}</span>
+                      ${tagAkses}
+                    </div>
                     <h3 class="font-black text-slate-800 text-base pt-1">${paketName}</h3>
-                    <p class="text-xs text-slate-400">Terdiri dari <b>${jumlahSoal}</b> butir soal.</p>
+                    <p class="text-xs text-slate-400">${infoJumlahText}</p>
                  </div>
                  <button onclick="window.mulaiMengerjakanPaket('${mode}', '${paketName}')" class="w-full py-3 bg-indigo-600 hover:bg-indigo-700 text-white font-black text-xs rounded-2xl shadow-md transition">
                     MULAI KERJAKAN &rarr;
@@ -1132,18 +1173,70 @@
     };
 
     window.mulaiMengerjakanPaket = async function(mode, paketName) {
+      const isUserPro = window.uAktif && window.uAktif.tipe === "pro";
+
+      // 1. CEK AKSES DAHULU UNTUK PAKET SIMULASI UJIAN
+      if (mode === "ujian" && !isUserPro) {
+        const isGratisPaket = /GRATIS|FREE/i.test(paketName);
+        if (!isGratisPaket) {
+          window.bukaModalUpgrade();
+          return;
+        }
+      }
+
       window.bukaModalDialog("Menyiapkan...", "Mengambil butir soal...");
       
       const snap = await getDocs(collection(db, "soal"));
       window.tutupModalDialog();
 
-      const list = [];
+      let list = [];
       snap.forEach(d => {
         const item = { id: d.id, ...d.data() };
         if((item.jenis || "latihan") === mode && (item.paket || "PAKET UMUM") === paketName) {
           list.push(item);
         }
       });
+
+      if (list.length === 0) {
+        window.bukaModalDialog("Peringatan", "Belum ada soal dalam paket ini.");
+        return;
+      }
+
+      // 2. LOGIKA PEMBATASAN DAN ACAK SOAL
+      if (mode === "latihan") {
+        // Mengacak soal di setiap paketnya
+        list = shuffleArray(list);
+
+        // Jika user FREE, batasi maksimal 10 soal per hari untuk paket ini
+        if (!isUserPro) {
+          const today = getTodayString();
+          const keyAkses = `latihan_usage_${window.uAktif.uid}_${paketName}`;
+          const rawUsage = localStorage.getItem(keyAkses);
+          
+          let usageData = { date: today, count: 0 };
+          if (rawUsage) {
+            try {
+              const parsed = JSON.parse(rawUsage);
+              if (parsed.date === today) {
+                usageData = parsed;
+              }
+            } catch(e){}
+          }
+
+          if (usageData.count >= 10) {
+            window.bukaModalDialog("Kuota Latihan Habis", "Akun Free hanya dapat mengerjakan maksimal 10 soal per hari untuk paket ini.\n\nKuota harian Anda akan aktif kembali besok, atau silakan Upgrade ke Pro untuk akses tanpa batas!");
+            return;
+          }
+
+          // Ambil sisa kuota hari ini (maksimal 10)
+          const sisaKuota = 10 - usageData.count;
+          list = list.slice(0, sisaKuota);
+
+          // Simpan penggunaan harian baru
+          usageData.count += list.length;
+          localStorage.setItem(keyAkses, JSON.stringify(usageData));
+        }
+      }
 
       window.st.jenis = mode;
       window.st.soal = list;
@@ -1366,7 +1459,7 @@
         if(window.st.jenis === "ujian") {
           window.konfirmasiSelesaikanUjian();
         } else {
-          window.bukaModalDialog("Selesai", "Anda telah menyelesaikan seluruh latihan dalam paket ini!");
+          window.bukaModalDialog("Selesai", "Anda telah menyelesaikan seluruh latihan dalam sesi ini!");
           window.kembaliKeDash();
         }
       }
