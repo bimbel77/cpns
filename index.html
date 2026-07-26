@@ -405,48 +405,85 @@
     </div>
 
     <!-- AREA LATIHAN & SIMULASI UJIAN PESERTA -->
-    <div id="area-latihan-soal" class="hidden max-w-3xl mx-auto space-y-6">
-       <div class="flex items-center justify-between bg-white px-6 py-4 rounded-3xl border shadow-sm">
+    <div id="area-latihan-soal" class="hidden max-w-5xl mx-auto space-y-6">
+       <div class="flex flex-wrap items-center justify-between bg-white px-6 py-4 rounded-3xl border shadow-sm gap-3">
           <div>
              <span id="mode-badge" class="text-[10px] font-black text-indigo-600 uppercase">MODE LATIHAN MANDIRI</span>
              <h2 id="latihan-info-judul" class="text-sm font-black text-slate-800">Latihan Soal</h2>
           </div>
-          <div class="flex items-center gap-3">
+          <div class="flex items-center gap-2 sm:gap-3 flex-wrap">
              <!-- TIMER HITUNG MAJU UNTUK SIMULASI UJIAN -->
              <div id="timer-box" class="hidden bg-slate-900 border border-slate-800 text-emerald-400 px-3 py-1.5 rounded-xl font-mono text-xs font-bold">
                 ⏱️ Waktu: <span id="timer-count">00:00</span>
              </div>
+             
+             <!-- BUTTON SELESAIKAN UJIAN (DI HEADER) -->
+             <button id="btn-selesaikan-header" onclick="konfirmasiSelesaikanUjian()" class="hidden px-3.5 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl font-black text-xs shadow-sm transition">
+                ✅ Selesaikan Ujian
+             </button>
+
              <button onclick="kembaliKeDash()" class="px-4 py-2 bg-slate-100 text-slate-700 rounded-xl font-black text-xs">🏠 Dashboard</button>
           </div>
        </div>
 
-       <div class="bg-white rounded-3xl border p-6 sm:p-8 space-y-6 shadow-sm">
-          <div class="flex items-center justify-between border-b pb-4">
-             <span class="text-xs font-bold text-slate-400" id="latihan-no-soal">Soal Nomor -</span>
-             <span id="status-mode-tag" class="px-2.5 py-1 bg-emerald-50 text-emerald-700 rounded-lg text-[10px] font-black">Latihan Mandiri</span>
+       <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 items-start">
+          <!-- KIRI/ATAS: CONTAINER UTAMA SOAL -->
+          <div class="lg:col-span-2 bg-white rounded-3xl border p-6 sm:p-8 space-y-6 shadow-sm">
+             <div class="flex items-center justify-between border-b pb-4">
+                <span class="text-xs font-bold text-slate-400" id="latihan-no-soal">Soal Nomor -</span>
+                <span id="status-mode-tag" class="px-2.5 py-1 bg-emerald-50 text-emerald-700 rounded-lg text-[10px] font-black">Latihan Mandiri</span>
+             </div>
+
+             <div class="space-y-4">
+                <!-- GAMBAR SOAL -->
+                <div id="latihan-gambar-container" class="hidden rounded-2xl bg-slate-50 border p-2 text-center">
+                   <img id="latihan-gambar-soal" src="" class="max-h-72 object-contain mx-auto rounded-xl" alt="Gambar Soal">
+                </div>
+                
+                <p id="latihan-teks-soal" class="text-slate-800 leading-relaxed text-sm sm:text-base whitespace-pre-line font-medium"></p>
+             </div>
+
+             <!-- LIST OPSI JAWABAN PESERTA -->
+             <div class="space-y-3 pt-2" id="latihan-list-opsi"></div>
+
+             <!-- PEMBAHASAN MODE MANDIRI -->
+             <div id="latihan-blok-pembahasan" class="hidden bg-indigo-50/70 border border-indigo-200 p-5 rounded-2xl space-y-2">
+                <h4 class="font-black text-xs text-indigo-950 uppercase">💡 Kunci Jawaban & Pembahasan</h4>
+                <p id="latihan-teks-pembahasan" class="text-xs text-indigo-900 leading-relaxed whitespace-pre-line"></p>
+             </div>
+
+             <!-- TOMBOL NAVIGASI DUA ARAH -->
+             <div class="flex flex-col sm:flex-row gap-3 pt-4 border-t">
+                <button id="btn-latihan-prev" onclick="geserSoalSebelumnya()" class="py-3.5 px-5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-2xl font-black text-xs shadow-sm transition">
+                   &larr; SOAL SEBELUMNYA
+                </button>
+                <button id="btn-cek-jawaban" onclick="cekJawabanLatihan()" class="flex-1 py-3.5 bg-indigo-600 text-white rounded-2xl font-black text-xs shadow-md">
+                   CEK JAWABAN
+                </button>
+                <button id="btn-latihan-lanjut" onclick="geserLatihanLanjut()" class="flex-1 py-3.5 bg-slate-900 text-white rounded-2xl font-black text-xs shadow-md">
+                   SOAL BERIKUTNYA &rarr;
+                </button>
+             </div>
           </div>
 
-          <div class="space-y-4">
-             <!-- GAMBAR SOAL -->
-             <div id="latihan-gambar-container" class="hidden rounded-2xl bg-slate-50 border p-2 text-center">
-                <img id="latihan-gambar-soal" src="" class="max-h-72 object-contain mx-auto rounded-xl" alt="Gambar Soal">
+          <!-- KANAN/BAWAH: PANEL NAVIGASI NOMOR SOAL (OPTIMAL HP & DESKTOP) -->
+          <div class="bg-white rounded-3xl border p-6 space-y-4 shadow-sm sticky top-20">
+             <div class="flex items-center justify-between border-b pb-3">
+                <h3 class="font-black text-xs text-slate-800 uppercase tracking-wider">Navigasi Soal</h3>
+                <span class="text-[10px] text-slate-400 font-bold" id="info-terjawab">0 Terjawab</span>
              </div>
              
-             <p id="latihan-teks-soal" class="text-slate-800 leading-relaxed text-sm sm:text-base whitespace-pre-line font-medium"></p>
-          </div>
+             <!-- GRID NOMOR SOAL -->
+             <div id="grid-navigasi-soal" class="grid grid-cols-5 sm:grid-cols-6 lg:grid-cols-5 gap-2 max-h-72 overflow-y-auto p-1 hide-scroll">
+                <!-- Tombol-tombol nomor soal di-render dinamis lewat JS -->
+             </div>
 
-          <!-- LIST OPSI JAWABAN PESERTA -->
-          <div class="space-y-3 pt-2" id="latihan-list-opsi"></div>
-
-          <!-- PEMBAHASAN -->
-          <div id="latihan-blok-pembahasan" class="hidden bg-indigo-50/70 border border-indigo-200 p-5 rounded-2xl space-y-2">
-             <h4 class="font-black text-xs text-indigo-950 uppercase">💡 Kunci Jawaban & Pembahasan</h4>
-             <p id="latihan-teks-pembahasan" class="text-xs text-indigo-900 leading-relaxed whitespace-pre-line"></p>
-          </div>
-
-          <div class="flex flex-col sm:flex-row gap-3 pt-4 border-t">
-             <button id="btn-cek-jawaban" onclick="cekJawabanLatihan()" class="flex-1 py-3.5 bg-indigo-600 text-white rounded-2xl font-black text-xs shadow-md">CEK JAWABAN</button>
-             <button id="btn-latihan-lanjut" onclick="geserLatihanLanjut()" class="flex-1 py-3.5 bg-slate-900 text-white rounded-2xl font-black text-xs shadow-md">SOAL BERIKUTNYA &rarr;</button>
+             <!-- SELESAIKAN UJIAN DARI NAVIGASI -->
+             <div id="box-selesai-nav" class="pt-2 hidden border-t">
+                <button onclick="konfirmasiSelesaikanUjian()" class="w-full py-3 bg-emerald-600 hover:bg-emerald-700 text-white font-black text-xs rounded-2xl shadow-md transition flex items-center justify-center gap-2">
+                   <span>✅</span> Selesaikan Ujian
+                </button>
+             </div>
           </div>
        </div>
     </div>
@@ -486,6 +523,22 @@
                 🏠 DASHBOARD
              </button>
           </div>
+       </div>
+    </div>
+
+    <!-- AREA PEMBAHASAN KESELURUHAN (PEMBAHASAN TAMPIL SEKALIGUS) -->
+    <div id="area-pembahasan-keseluruhan" class="hidden max-w-4xl mx-auto space-y-6">
+       <div class="flex items-center justify-between bg-white px-6 py-4 rounded-3xl border shadow-sm">
+          <div>
+             <span class="text-[10px] font-black text-indigo-600 uppercase">PEMBAHASAN KESELURUHAN</span>
+             <h2 id="pembahasan-nama-paket" class="text-lg font-black text-slate-800">Paket Ujian</h2>
+          </div>
+          <button onclick="kembaliKeDash()" class="px-4 py-2 bg-slate-100 text-slate-700 rounded-xl font-black text-xs">🏠 Dashboard</button>
+       </div>
+
+       <!-- CONTAINER LIST SELURUH SOAL & PEMBAHASAN -->
+       <div id="list-pembahasan-container" class="space-y-6">
+          <!-- Seluruh Soal, Jawaban & Pembahasan dirender sekaligus di sini -->
        </div>
     </div>
 
@@ -935,7 +988,7 @@
       XLSX.writeFile(workbook, "Template_Import_Soal_CBT.xlsx");
     };
 
-    // IMPORT SOAL MASSAL EXCEL/CSV (TELAH DIPERBAIKI SENSITIVITAS KOLOM & NILAI DINAMIS)
+    // IMPORT SOAL MASSAL EXCEL/CSV
     window.adminImportExcel = function(e) {
       e.preventDefault();
       const fileInput = document.getElementById("adm-import-excel-file");
@@ -959,7 +1012,6 @@
 
           window.bukaModalDialog("Mengunggah...", `Mengunggah ${jsonData.length} soal ke database Firebase...`);
 
-          // Helper pencarian nilai key insensitive
           const getValue = (obj, keys, defaultVal = "") => {
             const objKeys = Object.keys(obj);
             for (const key of keys) {
@@ -972,30 +1024,23 @@
           };
 
           for (const item of jsonData) {
-            // Ambil jenis & validasi
             let valJenis = getValue(item, ["jenis", "kategori", "type"], "latihan").toLowerCase();
             if (valJenis !== "ujian") valJenis = "latihan";
 
-            // Ambil nama paket
             const valPaket = getValue(item, ["paket", "nama_paket", "nama paket", "package"], "PAKET IMPORT").toUpperCase();
-
-            // Ambil teks soal
             const valSoal = getValue(item, ["soal", "pertanyaan", "question", "teks"]);
 
-            // Ambil Opsi
             const valOpsiA = getValue(item, ["opsi_a", "opsia", "a", "pilihan_a"]);
             const valOpsiB = getValue(item, ["opsi_b", "opsib", "b", "pilihan_b"]);
             const valOpsiC = getValue(item, ["opsi_c", "opsic", "c", "pilihan_c"]);
             const valOpsiD = getValue(item, ["opsi_d", "opsid", "d", "pilihan_d"]);
             const valOpsiE = getValue(item, ["opsi_e", "opsie", "e", "pilihan_e"]);
 
-            // Ambil Kunci Jawaban
             let valJawaban = getValue(item, ["jawaban", "kunci", "kunci_jawaban", "key", "rules"], "A").toUpperCase();
             if (!["A", "B", "C", "D", "E"].includes(valJawaban)) {
-              valJawaban = "A"; // default fallback jika format salah
+              valJawaban = "A";
             }
 
-            // Ambil Pembahasan
             const valPembahasan = getValue(item, ["pembahasan", "discussion", "keterangan"]);
 
             await addDoc(collection(db, "soal"), {
@@ -1109,6 +1154,7 @@
 
       document.getElementById("area-pilih-paket").classList.add("hidden");
       document.getElementById("area-hasil-ujian").classList.add("hidden");
+      document.getElementById("area-pembahasan-keseluruhan").classList.add("hidden");
       document.getElementById("area-latihan-soal").classList.remove("hidden");
       window.pindahHalamanInternal("latihan-soal");
 
@@ -1116,6 +1162,8 @@
         document.getElementById("mode-badge").innerText = "SIMULASI PAKET UJIAN";
         document.getElementById("status-mode-tag").innerText = "SIMULASI UJIAN";
         document.getElementById("timer-box").classList.remove("hidden");
+        document.getElementById("btn-selesaikan-header").classList.remove("hidden");
+        document.getElementById("box-selesai-nav").classList.remove("hidden");
         document.getElementById("btn-cek-jawaban").classList.add("hidden");
         
         // TIMER HITUNG MAJU (STOPWATCH)
@@ -1133,10 +1181,48 @@
         document.getElementById("mode-badge").innerText = "MODE LATIHAN MANDIRI";
         document.getElementById("status-mode-tag").innerText = "LATIHAN MANDIRI";
         document.getElementById("timer-box").classList.add("hidden");
+        document.getElementById("btn-selesaikan-header").classList.add("hidden");
+        document.getElementById("box-selesai-nav").classList.add("hidden");
         document.getElementById("btn-cek-jawaban").classList.remove("hidden");
         if(window.st.timerInterval) clearInterval(window.st.timerInterval);
       }
 
+      tampilkanSoalLatihan();
+    };
+
+    function renderNavigasiNomor() {
+      const grid = document.getElementById("grid-navigasi-soal");
+      grid.innerHTML = "";
+
+      let jumlahTerjawab = 0;
+
+      window.st.soal.forEach((s, idx) => {
+        const isSelected = window.st.jwb[idx] !== undefined;
+        if (isSelected) jumlahTerjawab++;
+
+        const isCurrent = idx === window.st.idx;
+        
+        let btnClass = "w-full aspect-square rounded-xl flex items-center justify-center font-black text-xs transition border cursor-pointer ";
+
+        if (isCurrent) {
+          btnClass += "bg-indigo-600 text-white border-indigo-700 ring-2 ring-indigo-400 ";
+        } else if (isSelected) {
+          btnClass += "bg-indigo-100 text-indigo-700 border-indigo-300 font-bold ";
+        } else {
+          btnClass += "bg-slate-50 text-slate-600 border-slate-200 hover:bg-slate-100 ";
+        }
+
+        grid.innerHTML += `
+          <button onclick="pindahKeNomor(${idx})" class="${btnClass}">
+             ${idx + 1}
+          </button>`;
+      });
+
+      document.getElementById("info-terjawab").innerText = `${jumlahTerjawab}/${window.st.soal.length} Terjawab`;
+    }
+
+    window.pindahKeNomor = function(targetIdx) {
+      window.st.idx = targetIdx;
       tampilkanSoalLatihan();
     };
 
@@ -1146,6 +1232,14 @@
       document.getElementById("latihan-info-judul").innerText = `${s.paket || 'Latihan'} (${window.st.idx + 1}/${window.st.soal.length})`;
       document.getElementById("latihan-no-soal").innerText = `Soal Nomor ${window.st.idx + 1}`;
       document.getElementById("latihan-teks-soal").innerText = s.soal;
+
+      // Atur visibilitas tombol sebelumnya
+      const btnPrev = document.getElementById("btn-latihan-prev");
+      if(window.st.idx === 0) {
+        btnPrev.classList.add("opacity-40", "pointer-events-none");
+      } else {
+        btnPrev.classList.remove("opacity-40", "pointer-events-none");
+      }
 
       // Render Gambar Soal
       const imgContainer = document.getElementById("latihan-gambar-container");
@@ -1157,10 +1251,7 @@
         imgContainer.classList.add("hidden");
       }
 
-      // Pembahasan otomatis sembunyi jika bukan mode review
-      if(!window.st.isReviewMode) {
-        document.getElementById("latihan-blok-pembahasan").classList.add("hidden");
-      }
+      document.getElementById("latihan-blok-pembahasan").classList.add("hidden");
 
       // Render Opsi Jawaban
       const bOpsi = document.getElementById("latihan-list-opsi");
@@ -1179,19 +1270,10 @@
             : "";
 
           const isSelected = jwbDipilih === huruf;
-          let classStyle = "w-full text-left p-4 bg-slate-50 border border-slate-200 rounded-2xl hover:bg-slate-100 transition";
+          let classStyle = "w-full text-left p-4 bg-slate-50 border border-slate-200 rounded-2xl hover:bg-slate-100 transition cursor-pointer";
 
           if (isSelected) {
-            classStyle = "w-full text-left p-4 bg-indigo-50 border-2 border-indigo-600 rounded-2xl transition";
-          }
-
-          // Jika dalam Mode Review Ujian
-          if(window.st.isReviewMode) {
-            if(huruf === s.jawaban) {
-              classStyle = "w-full text-left p-4 bg-emerald-50 border-2 border-emerald-500 rounded-2xl font-bold text-emerald-900";
-            } else if(isSelected && isSelected !== s.jawaban) {
-              classStyle = "w-full text-left p-4 bg-rose-50 border-2 border-rose-500 rounded-2xl font-bold text-rose-900";
-            }
+            classStyle = "w-full text-left p-4 bg-indigo-50 border-2 border-indigo-600 rounded-2xl transition cursor-pointer";
           }
 
           bOpsi.innerHTML += `
@@ -1207,50 +1289,44 @@
         }
       });
 
-      if(window.st.isReviewMode) {
-        window.cekJawabanLatihan();
-      }
+      renderNavigasiNomor();
     }
 
     window.pilihOpsiLatihan = function(opsi) {
-      if(window.st.isReviewMode) return; // Kunci jika sedang lihat pembahasan
-
       window.st.jwb[window.st.idx] = opsi;
       ["A", "B", "C", "D", "E"].forEach(h => {
         const el = document.getElementById(`btn-opsi-${h}`);
         if (el) {
           if (h === opsi) {
-            el.className = "w-full text-left p-4 bg-indigo-50 border-2 border-indigo-600 rounded-2xl transition";
+            el.className = "w-full text-left p-4 bg-indigo-50 border-2 border-indigo-600 rounded-2xl transition cursor-pointer";
           } else {
-            el.className = "w-full text-left p-4 bg-slate-50 border border-slate-200 rounded-2xl hover:bg-slate-100 transition";
+            el.className = "w-full text-left p-4 bg-slate-50 border border-slate-200 rounded-2xl hover:bg-slate-100 transition cursor-pointer";
           }
         }
       });
+
+      renderNavigasiNomor();
     };
 
-    // FUNGSI CEK JAWABAN DENGAN EFEK WARNA OTOMATIS (HIJAU / MERAH)
     window.cekJawabanLatihan = function() {
       const s = window.st.soal[window.st.idx];
       const jwbUser = window.st.jwb[window.st.idx];
       const kunci = s.jawaban;
 
-      if(!jwbUser && !window.st.isReviewMode) {
+      if(!jwbUser) {
         window.bukaModalDialog("Peringatan", "Silakan pilih salah satu jawaban terlebih dahulu!");
         return;
       }
 
-      // Memberikan efek warna pada tombol opsi
       ["A", "B", "C", "D", "E"].forEach(h => {
         const el = document.getElementById(`btn-opsi-${h}`);
         const badge = document.getElementById(`badge-opsi-${h}`);
 
         if (el) {
           if (h === kunci) {
-            // JAWABAN BENAR -> HIJAU
             el.className = "w-full text-left p-4 bg-emerald-50 border-2 border-emerald-500 rounded-2xl transition shadow-sm";
             if(badge) badge.className = "w-7 h-7 rounded-lg bg-emerald-500 text-white flex items-center justify-center text-xs font-black shrink-0";
           } else if (h === jwbUser && jwbUser !== kunci) {
-            // JAWABAN SALAH PESERTA -> MERAH
             el.className = "w-full text-left p-4 bg-rose-50 border-2 border-rose-500 rounded-2xl transition shadow-sm";
             if(badge) badge.className = "w-7 h-7 rounded-lg bg-rose-500 text-white flex items-center justify-center text-xs font-black shrink-0";
           } else {
@@ -1263,45 +1339,20 @@
       document.getElementById("latihan-blok-pembahasan").classList.remove("hidden");
     };
 
+    window.geserSoalSebelumnya = function() {
+      if (window.st.idx > 0) {
+        window.st.idx--;
+        tampilkanSoalLatihan();
+      }
+    };
+
     window.geserLatihanLanjut = function() {
       if (window.st.idx + 1 < window.st.soal.length) {
         window.st.idx++;
         tampilkanSoalLatihan();
       } else {
-        if(window.st.timerInterval) clearInterval(window.st.timerInterval);
-        
         if(window.st.jenis === "ujian") {
-          let benar = 0;
-          let salah = 0;
-
-          window.st.soal.forEach((s, i) => {
-            if(window.st.jwb[i] === s.jawaban) {
-              benar++;
-            } else {
-              salah++;
-            }
-          });
-
-          // HITUNG BOBOT SKOR (5 POIN / SOAL)
-          const bobotPerSoal = 5;
-          const skorDiperoleh = benar * bobotPerSoal;
-          const skorMaksimal = window.st.soal.length * bobotPerSoal;
-
-          const m = Math.floor(window.st.detikBerjalan / 60);
-          const s = window.st.detikBerjalan % 60;
-          const waktuFormatted = `${m < 10 ? '0'+m : m}:${s < 10 ? '0'+s : s}`;
-
-          // TAMPILKAN HALAMAN HASIL UJIAN
-          document.getElementById("hasil-nama-paket").innerText = window.st.soal[0]?.paket || "Paket Ujian";
-          document.getElementById("hasil-skor-user").innerText = skorDiperoleh;
-          document.getElementById("hasil-skor-max").innerText = skorMaksimal;
-          document.getElementById("hasil-detail-jawaban").innerText = `Benar: ${benar} | Salah/Kosong: ${salah} | Total Soal: ${window.st.soal.length}`;
-          document.getElementById("hasil-total-waktu").innerText = `Total Waktu Pengerjaan: ${waktuFormatted}`;
-
-          document.getElementById("area-latihan-soal").classList.add("hidden");
-          document.getElementById("area-hasil-ujian").classList.remove("hidden");
-          window.pindahHalamanInternal("hasil-ujian");
-
+          window.konfirmasiSelesaikanUjian();
         } else {
           window.bukaModalDialog("Selesai", "Anda telah menyelesaikan seluruh latihan dalam paket ini!");
           window.kembaliKeDash();
@@ -1309,20 +1360,136 @@
       }
     };
 
+    // KONFIRMASI DAN PROSES KELUAR HASIL UJIAN
+    window.konfirmasiSelesaikanUjian = function() {
+      const totalSoal = window.st.soal.length;
+      const dijawab = Object.keys(window.st.jwb).length;
+
+      let msg = `Anda telah menjawab ${dijawab} dari ${totalSoal} soal. Selesaikan ujian sekarang?`;
+      if (dijawab < totalSoal) {
+        msg = `Masih ada ${totalSoal - dijawab} soal yang belum Anda jawab!\nApakah Anda yakin ingin menyelesaikan ujian sekarang?`;
+      }
+
+      if (confirm(msg)) {
+        window.prosesProsesSelesaiUjian();
+      }
+    };
+
+    window.prosesProsesSelesaiUjian = function() {
+      if(window.st.timerInterval) clearInterval(window.st.timerInterval);
+
+      let benar = 0;
+      let salah = 0;
+
+      window.st.soal.forEach((s, i) => {
+        if(window.st.jwb[i] === s.jawaban) {
+          benar++;
+        } else {
+          salah++;
+        }
+      });
+
+      const bobotPerSoal = 5;
+      const skorDiperoleh = benar * bobotPerSoal;
+      const skorMaksimal = window.st.soal.length * bobotPerSoal;
+
+      const m = Math.floor(window.st.detikBerjalan / 60);
+      const s = window.st.detikBerjalan % 60;
+      const waktuFormatted = `${m < 10 ? '0'+m : m}:${s < 10 ? '0'+s : s}`;
+
+      document.getElementById("hasil-nama-paket").innerText = window.st.soal[0]?.paket || "Paket Ujian";
+      document.getElementById("hasil-skor-user").innerText = skorDiperoleh;
+      document.getElementById("hasil-skor-max").innerText = skorMaksimal;
+      document.getElementById("hasil-detail-jawaban").innerText = `Benar: ${benar} | Salah/Kosong: ${salah} | Total Soal: ${window.st.soal.length}`;
+      document.getElementById("hasil-total-waktu").innerText = `Total Waktu Pengerjaan: ${waktuFormatted}`;
+
+      document.getElementById("area-latihan-soal").classList.add("hidden");
+      document.getElementById("area-hasil-ujian").classList.remove("hidden");
+      window.pindahHalamanInternal("hasil-ujian");
+    };
+
+    // LIHAT PEMBAHASAN LENGKAP SEKALIGUS (SEPERTI YANG DIMINTA)
     window.mulaiLihatPembahasanUjian = function() {
-      window.st.isReviewMode = true;
-      window.st.idx = 0;
+      const container = document.getElementById("list-pembahasan-container");
+      container.innerHTML = "";
+
+      document.getElementById("pembahasan-nama-paket").innerText = window.st.soal[0]?.paket || "Paket Ujian";
+
+      window.st.soal.forEach((s, idx) => {
+        const jwbUser = window.st.jwb[idx] || "Tidak Diisi";
+        const kunci = s.jawaban;
+        const isBenar = jwbUser === kunci;
+
+        // Gambar Pertanyaan
+        const imgSoalHtml = (s.gambar_soal && s.gambar_soal.trim() !== "") 
+          ? `<div class="rounded-xl bg-slate-50 border p-2 text-center mb-3">
+               <img src="${s.gambar_soal}" class="max-h-60 object-contain mx-auto rounded-lg" alt="Gambar Soal">
+             </div>` 
+          : "";
+
+        // Opsi A-E
+        let listOpsiHtml = "";
+        ["a", "b", "c", "d", "e"].forEach(k => {
+          const keyText = "opsi_" + k;
+          const keyImg = "img_" + k;
+          const huruf = k.toUpperCase();
+
+          if (s[keyText] && s[keyText].trim() !== "") {
+            const imgOpsi = (s[keyImg] && s[keyImg].trim() !== "") 
+              ? `<img src="${s[keyImg]}" class="mt-2 max-h-36 rounded-lg object-contain border" alt="Opsi ${huruf}">` 
+              : "";
+
+            let styleOpsi = "p-3 rounded-xl border text-xs bg-slate-50 text-slate-700";
+
+            if (huruf === kunci) {
+              styleOpsi = "p-3 rounded-xl border-2 border-emerald-500 bg-emerald-50 font-bold text-emerald-900";
+            } else if (huruf === jwbUser && !isBenar) {
+              styleOpsi = "p-3 rounded-xl border-2 border-rose-500 bg-rose-50 font-bold text-rose-900";
+            }
+
+            listOpsiHtml += `
+              <div class="${styleOpsi}">
+                 <div class="flex items-start gap-2">
+                    <span class="font-black">${huruf}.</span>
+                    <div>
+                       <p>${s[keyText]}</p>
+                       ${imgOpsi}
+                    </div>
+                 </div>
+              </div>`;
+          }
+        });
+
+        // HTML untuk Per Soal di Pembahasan
+        container.innerHTML += `
+          <div class="bg-white rounded-3xl border border-slate-200 p-6 sm:p-8 space-y-4 shadow-sm">
+             <div class="flex items-center justify-between border-b pb-3">
+                <span class="font-black text-sm text-slate-800">Soal Nomor ${idx + 1}</span>
+                <span class="px-3 py-1 rounded-full text-[10px] font-black ${isBenar ? 'bg-emerald-100 text-emerald-800' : 'bg-rose-100 text-rose-800'}">
+                   ${isBenar ? 'SANGAT TEPAT (BENAR)' : 'KURANG TEPAT (SALAH)'}
+                </span>
+             </div>
+
+             ${imgSoalHtml}
+             <p class="text-sm font-medium text-slate-800 leading-relaxed whitespace-pre-line">${s.soal}</p>
+
+             <div class="space-y-2 pt-2">
+                <p class="text-[10px] font-black text-slate-400 uppercase">Pilihan Jawaban & Opsi:</p>
+                <div class="grid grid-cols-1 gap-2">${listOpsiHtml}</div>
+             </div>
+
+             <!-- KOTAK PEMBAHASAN -->
+             <div class="bg-indigo-50 border border-indigo-200 p-4 rounded-2xl space-y-1.5 mt-4">
+                <p class="text-xs font-black text-indigo-950 uppercase">💡 Kunci & Pembahasan Soal:</p>
+                <p class="text-xs text-indigo-900 leading-relaxed whitespace-pre-line"><b>Kunci Jawaban: ${kunci}</b> (Jawaban Anda: ${jwbUser})\n\n${s.pembahasan || 'Tidak ada pembahasan khusus untuk soal ini.'}</p>
+             </div>
+          </div>`;
+      });
 
       document.getElementById("area-hasil-ujian").classList.add("hidden");
-      document.getElementById("area-latihan-soal").classList.remove("hidden");
-      document.getElementById("btn-cek-jawaban").classList.add("hidden");
-      document.getElementById("timer-box").classList.add("hidden");
-
-      document.getElementById("mode-badge").innerText = "REVIEW PEMBAHASAN UJIAN";
-      document.getElementById("status-mode-tag").innerText = "PEMBAHASAN";
-
-      window.pindahHalamanInternal("review-ujian");
-      tampilkanSoalLatihan();
+      document.getElementById("area-pembahasan-keseluruhan").classList.remove("hidden");
+      window.pindahHalamanInternal("pembahasan-keseluruhan");
+      window.scrollTo({ top: 0, behavior: 'smooth' });
     };
 
     // SUBMIT MATERI & INFORMASI
@@ -1480,6 +1647,7 @@
        document.getElementById("area-pilih-paket").classList.add("hidden");
        document.getElementById("area-latihan-soal").classList.add("hidden");
        document.getElementById("area-hasil-ujian").classList.add("hidden");
+       document.getElementById("area-pembahasan-keseluruhan").classList.add("hidden");
        document.getElementById("area-materi").classList.add("hidden");
        
        if (window.uAktif && window.uAktif.role === "admin") {
