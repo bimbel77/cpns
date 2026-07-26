@@ -9,6 +9,9 @@
   <script src="https://cdn.tailwindcss.com"></script>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght=300;400;500;600;700;900&display=swap" rel="stylesheet">
   
+  <!-- SheetJS Library untuk baca Excel (.xlsx/.xls) dan CSV -->
+  <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+
   <style>
     body { font-family: 'Inter', sans-serif; }
     .hide-scroll::-webkit-scrollbar { display: none; }
@@ -137,15 +140,15 @@
              </div>
           </button>
 
-          <button onclick="mulaiLatihan()" class="bg-white p-6 rounded-3xl border border-slate-200 text-left hover:border-indigo-500 hover:shadow-lg transition flex flex-col justify-between h-44">
+          <button onclick="bukaPilihPaket('latihan')" class="bg-white p-6 rounded-3xl border border-slate-200 text-left hover:border-indigo-500 hover:shadow-lg transition flex flex-col justify-between h-44">
              <div class="bg-indigo-50 p-3 rounded-2xl text-indigo-600 w-fit">💡</div>
              <div>
                 <h3 class="font-black text-sm text-slate-800">Latihan Mandiri</h3>
-                <p class="text-[11px] text-slate-400 mt-1">Kerjakan latihan soal beserta pembahasannya.</p>
+                <p class="text-[11px] text-slate-400 mt-1">Kerjakan latihan per paket soal beserta pembahasannya.</p>
              </div>
           </button>
 
-          <button onclick="bukaMenuPaketUjian()" class="bg-white p-6 rounded-3xl border border-slate-200 text-left hover:border-indigo-500 hover:shadow-lg transition flex flex-col justify-between h-44">
+          <button onclick="bukaPilihPaket('ujian')" class="bg-white p-6 rounded-3xl border border-slate-200 text-left hover:border-indigo-500 hover:shadow-lg transition flex flex-col justify-between h-44">
              <div class="bg-indigo-50 p-3 rounded-2xl text-indigo-600 w-fit">⏱️</div>
              <div>
                 <h3 class="font-black text-sm text-slate-800">Simulasi Paket Ujian</h3>
@@ -177,17 +180,22 @@
 
        <!-- Tab Menu Admin -->
        <div class="flex bg-slate-200 p-1 rounded-2xl overflow-x-auto gap-1">
-          <button onclick="pilihTabAdmin('admin-soal')" id="tab-adm-soal" class="flex-1 py-3 text-center text-xs font-black rounded-xl bg-white text-indigo-600 shadow whitespace-nowrap px-4">📝 INPUT SOAL</button>
-          <button onclick="pilihTabAdmin('admin-import')" id="tab-adm-import" class="flex-1 py-3 text-center text-xs font-black rounded-xl text-slate-600 hover:text-slate-950 whitespace-nowrap px-4">📥 IMPORT SOAL MASSAL</button>
+          <button onclick="pilihTabAdmin('admin-soal')" id="tab-adm-soal" class="flex-1 py-3 text-center text-xs font-black rounded-xl bg-white text-indigo-600 shadow whitespace-nowrap px-4">📝 INPUT / EDIT SOAL</button>
+          <button onclick="pilihTabAdmin('admin-import')" id="tab-adm-import" class="flex-1 py-3 text-center text-xs font-black rounded-xl text-slate-600 hover:text-slate-950 whitespace-nowrap px-4">📥 IMPORT EXCEL/CSV</button>
           <button onclick="pilihTabAdmin('admin-materi')" id="tab-adm-materi" class="flex-1 py-3 text-center text-xs font-black rounded-xl text-slate-600 hover:text-slate-950 whitespace-nowrap px-4">📖 MATERI PRO</button>
           <button onclick="pilihTabAdmin('admin-informasi')" id="tab-adm-informasi" class="flex-1 py-3 text-center text-xs font-black rounded-xl text-slate-600 hover:text-slate-950 whitespace-nowrap px-4">🔔 INFORMASI</button>
           <button onclick="pilihTabAdmin('admin-peserta')" id="tab-adm-peserta" class="flex-1 py-3 text-center text-xs font-black rounded-xl text-slate-600 hover:text-slate-950 whitespace-nowrap px-4">👥 KELOLA PESERTA</button>
        </div>
 
-       <!-- TAB 1: INPUT SOAL TUNGGAL (UPLOAD GAMBAR DIRECT) -->
+       <!-- TAB 1: INPUT / EDIT SOAL -->
        <div id="panel-admin-soal" class="bg-white p-6 sm:p-8 rounded-3xl border border-slate-200 shadow-sm space-y-6">
-          <h3 class="text-base font-black text-slate-800">Tambah Soal Tunggal</h3>
+          <div class="flex items-center justify-between border-b pb-4">
+             <h3 id="adm-soal-form-title" class="text-base font-black text-slate-800">Tambah Soal Baru</h3>
+             <button id="btn-batal-edit" onclick="batalEditSoal()" class="hidden px-3 py-1 bg-slate-200 text-slate-700 font-bold text-xs rounded-xl">Batal Edit</button>
+          </div>
+
           <form id="form-admin-soal" onsubmit="adminSubmitSoal(event)" class="space-y-4">
+             <input type="hidden" id="adm-edit-id" value="">
              <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                    <label class="block text-[10px] font-black text-slate-400 uppercase mb-1">Kategori / Jenis</label>
@@ -211,6 +219,7 @@
              <div>
                 <label class="block text-[10px] font-black text-indigo-600 uppercase mb-1">📁 Upload Gambar Soal (Opsional)</label>
                 <input type="file" id="adm-soal-gambar-file" accept="image/*" class="w-full px-4 py-2 bg-indigo-50/40 border border-indigo-200 rounded-2xl text-xs text-slate-600 file:mr-4 file:py-1.5 file:px-3 file:rounded-xl file:border-0 file:text-xs file:font-black file:bg-indigo-600 file:text-white hover:file:bg-indigo-700">
+                <input type="hidden" id="adm-soal-gambar-old" value="">
              </div>
 
              <!-- PILIHAN OPSI DAN UPLOAD GAMBAR OPSI -->
@@ -223,6 +232,7 @@
                       <input type="text" id="adm-soal-opsi-a" required class="w-full px-3 py-2 bg-white border rounded-xl text-sm" placeholder="Opsi A (Teks)">
                       <label class="block text-[9px] font-bold text-slate-400 uppercase pt-1">Gambar Opsi A (Opsional)</label>
                       <input type="file" id="adm-soal-img-a-file" accept="image/*" class="w-full text-xs text-slate-500">
+                      <input type="hidden" id="adm-soal-img-a-old" value="">
                    </div>
                    
                    <!-- OPSI B -->
@@ -230,6 +240,7 @@
                       <input type="text" id="adm-soal-opsi-b" required class="w-full px-3 py-2 bg-white border rounded-xl text-sm" placeholder="Opsi B (Teks)">
                       <label class="block text-[9px] font-bold text-slate-400 uppercase pt-1">Gambar Opsi B (Opsional)</label>
                       <input type="file" id="adm-soal-img-b-file" accept="image/*" class="w-full text-xs text-slate-500">
+                      <input type="hidden" id="adm-soal-img-b-old" value="">
                    </div>
                    
                    <!-- OPSI C -->
@@ -237,6 +248,7 @@
                       <input type="text" id="adm-soal-opsi-c" class="w-full px-3 py-2 bg-white border rounded-xl text-sm" placeholder="Opsi C (Teks)">
                       <label class="block text-[9px] font-bold text-slate-400 uppercase pt-1">Gambar Opsi C (Opsional)</label>
                       <input type="file" id="adm-soal-img-c-file" accept="image/*" class="w-full text-xs text-slate-500">
+                      <input type="hidden" id="adm-soal-img-c-old" value="">
                    </div>
                    
                    <!-- OPSI D -->
@@ -244,6 +256,7 @@
                       <input type="text" id="adm-soal-opsi-d" class="w-full px-3 py-2 bg-white border rounded-xl text-sm" placeholder="Opsi D (Teks)">
                       <label class="block text-[9px] font-bold text-slate-400 uppercase pt-1">Gambar Opsi D (Opsional)</label>
                       <input type="file" id="adm-soal-img-d-file" accept="image/*" class="w-full text-xs text-slate-500">
+                      <input type="hidden" id="adm-soal-img-d-old" value="">
                    </div>
                    
                    <!-- OPSI E -->
@@ -251,6 +264,7 @@
                       <input type="text" id="adm-soal-opsi-e" class="w-full px-3 py-2 bg-white border rounded-xl text-sm" placeholder="Opsi E (Teks)">
                       <label class="block text-[9px] font-bold text-slate-400 uppercase pt-1">Gambar Opsi E (Opsional)</label>
                       <input type="file" id="adm-soal-img-e-file" accept="image/*" class="w-full text-xs text-slate-500">
+                      <input type="hidden" id="adm-soal-img-e-old" value="">
                    </div>
                 </div>
              </div>
@@ -266,44 +280,55 @@
                 </div>
              </div>
 
-             <button type="submit" class="w-full py-3.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-2xl font-black text-xs shadow-md">SIMPAN SOAL KE FIREBASE</button>
+             <button id="btn-submit-soal" type="submit" class="w-full py-3.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-2xl font-black text-xs shadow-md">SIMPAN SOAL KE FIREBASE</button>
           </form>
+
+          <!-- TABEL DAFTAR SOAL TERSEDIA (EDIT & HAPUS) -->
+          <div class="pt-6 border-t border-slate-200 space-y-4">
+             <div class="flex items-center justify-between">
+                <h4 class="font-black text-sm text-slate-800">Daftar Soal Tersimpan di Database</h4>
+                <button onclick="adminLoadDaftarSoal()" class="px-3 py-1 bg-indigo-50 text-indigo-600 font-bold text-xs rounded-lg">Refresh Daftar Soal</button>
+             </div>
+             <div class="overflow-x-auto">
+                <table class="w-full text-left text-xs text-slate-600">
+                   <thead>
+                      <tr class="bg-slate-100 text-slate-500 uppercase text-[10px] font-black">
+                         <th class="py-3 px-3">Jenis</th>
+                         <th class="py-3 px-3">Paket</th>
+                         <th class="py-3 px-3">Teks Pertanyaan Soal</th>
+                         <th class="py-3 px-3">Kunci</th>
+                         <th class="py-3 px-3 text-center">Aksi</th>
+                      </tr>
+                   </thead>
+                   <tbody id="adm-tabel-soal-body" class="divide-y">
+                      <tr><td colspan="5" class="py-4 text-center text-slate-400">Klik refresh untuk menampilkan daftar soal...</td></tr>
+                   </tbody>
+                </table>
+             </div>
+          </div>
        </div>
 
-       <!-- TAB 2: IMPORT SOAL MASSAL -->
+       <!-- TAB 2: IMPORT SOAL EXCEL / CSV -->
        <div id="panel-admin-import" class="bg-white p-6 sm:p-8 rounded-3xl border border-slate-200 shadow-sm space-y-6 hidden">
           <div>
-             <h3 class="text-base font-black text-slate-800">Import Soal Sekaligus (Massal)</h3>
-             <p class="text-xs text-slate-500 mt-1">Pilih format data untuk mengunggah puluhan hingga ratusan soal sekaligus ke database Firebase.</p>
+             <h3 class="text-base font-black text-slate-800">Import Soal Massal dari Excel / CSV</h3>
+             <p class="text-xs text-slate-500 mt-1">Unggah file Spreadsheet (.xlsx, .xls, .csv) dengan format kolom berikut pada baris pertama (Header):</p>
           </div>
 
-          <div class="bg-indigo-50 border border-indigo-150 p-4 rounded-2xl text-xs text-indigo-900 space-y-2">
-             <p class="font-bold">📄 Contoh Format JSON (Tempelkan pada kotak di bawah):</p>
-<pre class="bg-indigo-950 text-emerald-400 p-3 rounded-xl overflow-x-auto text-[11px]">
-[
-  {
-    "jenis": "latihan",
-    "paket": "PAKET A",
-    "soal": "Berapakah 1 + 1?",
-    "gambar_soal": "",
-    "opsi_a": "2", "img_a": "",
-    "opsi_b": "3", "img_b": "",
-    "opsi_c": "4", "img_c": "",
-    "opsi_d": "5", "img_d": "",
-    "opsi_e": "6", "img_e": "",
-    "jawaban": "A",
-    "pembahasan": "1 ditambah 1 adalah 2"
-  }
-]
-</pre>
+          <div class="bg-indigo-50 border border-indigo-200 p-4 rounded-2xl text-xs text-indigo-900 space-y-2">
+             <p class="font-bold">📋 Format Header Kolom Excel / CSV:</p>
+             <p class="font-mono text-[11px] bg-white p-2 rounded-lg border text-indigo-950 font-bold overflow-x-auto">
+                jenis | paket | soal | opsi_a | opsi_b | opsi_c | opsi_d | opsi_e | jawaban | pembahasan
+             </p>
+             <p class="text-[10px] text-indigo-700">* Catatan: Isi kolom <b>jenis</b> dengan <code class="bg-indigo-100 px-1 rounded">latihan</code> atau <code class="bg-indigo-100 px-1 rounded">ujian</code>.</p>
           </div>
 
-          <form onsubmit="adminImportMassal(event)" class="space-y-4">
+          <form onsubmit="adminImportExcel(event)" class="space-y-4">
              <div>
-                <label class="block text-[10px] font-black text-slate-400 uppercase mb-1">Data Soal Format JSON Array</label>
-                <textarea id="adm-import-json" required rows="8" class="w-full p-4 bg-slate-900 text-emerald-400 font-mono text-xs rounded-2xl border" placeholder="Pastekan array JSON di sini..."></textarea>
+                <label class="block text-[10px] font-black text-slate-400 uppercase mb-1">Pilih File Excel (.xlsx / .xls) atau CSV</label>
+                <input type="file" id="adm-import-excel-file" accept=".xlsx, .xls, .csv" required class="w-full px-4 py-3 bg-slate-50 border rounded-2xl text-xs text-slate-600 file:mr-4 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-black file:bg-indigo-600 file:text-white hover:file:bg-indigo-700">
              </div>
-             <button type="submit" class="w-full py-3.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-2xl font-black text-xs shadow-md">PROSES & UNGGAH SEMUA SOAL</button>
+             <button type="submit" class="w-full py-3.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-2xl font-black text-xs shadow-md">UNGGAH & IMPORT SOAL DARI FILE</button>
           </form>
        </div>
 
@@ -350,20 +375,41 @@
        </div>
     </div>
 
-    <!-- AREA LATIHAN MANDIRI PESERTA -->
+    <!-- AREA PILIH PAKET PESERTA (UNTUK LATIHAN DAN UJIAN) -->
+    <div id="area-pilih-paket" class="hidden max-w-4xl mx-auto space-y-6">
+       <div class="flex items-center justify-between bg-white px-6 py-4 rounded-3xl border shadow-sm">
+          <div>
+             <span id="pilih-paket-kategori" class="text-[10px] font-black text-indigo-600 uppercase">MODE PESERTA</span>
+             <h2 id="pilih-paket-judul" class="text-lg font-black text-slate-800">Pilih Paket Soal</h2>
+          </div>
+          <button onclick="kembaliKeDash()" class="px-4 py-2 bg-slate-100 text-slate-700 rounded-xl font-black text-xs">🏠 Dashboard</button>
+       </div>
+
+       <div id="list-paket-container" class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <!-- Paket Soal akan dirender di sini via JS -->
+       </div>
+    </div>
+
+    <!-- AREA LATIHAN & SIMULASI UJIAN PESERTA -->
     <div id="area-latihan-soal" class="hidden max-w-3xl mx-auto space-y-6">
        <div class="flex items-center justify-between bg-white px-6 py-4 rounded-3xl border shadow-sm">
           <div>
-             <span class="text-[10px] font-black text-indigo-600 uppercase">MODE LATIHAN MANDIRI</span>
+             <span id="mode-badge" class="text-[10px] font-black text-indigo-600 uppercase">MODE LATIHAN MANDIRI</span>
              <h2 id="latihan-info-judul" class="text-sm font-black text-slate-800">Latihan Soal</h2>
           </div>
-          <button onclick="kembaliKeDash()" class="px-4 py-2 bg-slate-100 text-slate-700 rounded-xl font-black text-xs">🏠 Dashboard</button>
+          <div class="flex items-center gap-3">
+             <!-- TIMER UNTUK SIMULASI UJIAN -->
+             <div id="timer-box" class="hidden bg-red-50 border border-red-200 text-red-600 px-3 py-1.5 rounded-xl font-mono text-xs font-bold">
+                ⏱️ <span id="timer-count">00:00</span>
+             </div>
+             <button onclick="kembaliKeDash()" class="px-4 py-2 bg-slate-100 text-slate-700 rounded-xl font-black text-xs">🏠 Dashboard</button>
+          </div>
        </div>
 
        <div class="bg-white rounded-3xl border p-6 sm:p-8 space-y-6 shadow-sm">
           <div class="flex items-center justify-between border-b pb-4">
              <span class="text-xs font-bold text-slate-400" id="latihan-no-soal">Soal Nomor -</span>
-             <span class="px-2.5 py-1 bg-emerald-50 text-emerald-700 rounded-lg text-[10px] font-black">Latihan Mandiri</span>
+             <span id="status-mode-tag" class="px-2.5 py-1 bg-emerald-50 text-emerald-700 rounded-lg text-[10px] font-black">Latihan Mandiri</span>
           </div>
 
           <div class="space-y-4">
@@ -436,7 +482,7 @@
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
     import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
-    import { getFirestore, doc, setDoc, getDoc, collection, addDoc, getDocs, updateDoc, query, where } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+    import { getFirestore, doc, setDoc, getDoc, collection, addDoc, getDocs, updateDoc, deleteDoc, query, where } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
     const firebaseConfig = {
       apiKey: "AIzaSyBeIATeGNfjKFEAlPOTfQD9Lq3SgwmFvGA",
@@ -453,7 +499,8 @@
     const db = getFirestore(app);
 
     window.uAktif = null;
-    window.st = { jenis: "", soal: [], idx: 0, jwb: {} };
+    window.st = { jenis: "", soal: [], idx: 0, jwb: {}, timerInterval: null };
+    window.semuaSoalCache = [];
 
     // FUNGSI UTILITAS: Mengubah File Lokal ke String Base64
     const convertFileToBase64 = (fileInputId) => {
@@ -483,6 +530,7 @@
           if (window.uAktif.role === "admin") {
             document.getElementById("dash-peserta").classList.add("hidden");
             document.getElementById("dash-admin").classList.remove("hidden");
+            window.adminLoadDaftarSoal();
           } else {
             document.getElementById("dash-admin").classList.add("hidden");
             document.getElementById("dash-peserta").classList.remove("hidden");
@@ -557,97 +605,440 @@
 
       if(tabName === 'admin-peserta') {
         window.adminLoadDaftarPeserta();
+      } else if(tabName === 'admin-soal') {
+        window.adminLoadDaftarSoal();
       }
     };
 
-    // ADMIN SUBMIT SOAL TUNGGAL (DENGAN PROSES UPLOAD GAMBAR FILE LOKAL)
+    // ADMIN SUBMIT SOAL TUNGGAL (TAMBAH / EDIT)
     window.adminSubmitSoal = async function(e) {
       e.preventDefault();
       try {
-        window.bukaModalDialog("Memproses...", "Mengonversi dan mengunggah gambar...");
+        window.bukaModalDialog("Memproses...", "Mengonversi dan menyimpan data...");
 
-        // Konversi File Gambar Soal & Opsi ke Base64
-        const imgSoalBase64 = await convertFileToBase64("adm-soal-gambar-file");
-        const imgABase64 = await convertFileToBase64("adm-soal-img-a-file");
-        const imgBBase64 = await convertFileToBase64("adm-soal-img-b-file");
-        const imgCBase64 = await convertFileToBase64("adm-soal-img-c-file");
-        const imgDBase64 = await convertFileToBase64("adm-soal-img-d-file");
-        const imgEBase64 = await convertFileToBase64("adm-soal-img-e-file");
+        const editId = document.getElementById("adm-edit-id").value;
+
+        // Ambil Gambar Baru jika diupload, jika tidak gunakan gambar lama
+        const newImgSoal = await convertFileToBase64("adm-soal-gambar-file");
+        const newImgA = await convertFileToBase64("adm-soal-img-a-file");
+        const newImgB = await convertFileToBase64("adm-soal-img-b-file");
+        const newImgC = await convertFileToBase64("adm-soal-img-c-file");
+        const newImgD = await convertFileToBase64("adm-soal-img-d-file");
+        const newImgE = await convertFileToBase64("adm-soal-img-e-file");
 
         const payload = {
           jenis: document.getElementById("adm-soal-jenis").value,
-          paket: document.getElementById("adm-soal-paket").value,
+          paket: document.getElementById("adm-soal-paket").value.trim().toUpperCase(),
           soal: document.getElementById("adm-soal-teks").value,
-          gambar_soal: imgSoalBase64,
+          gambar_soal: newImgSoal || document.getElementById("adm-soal-gambar-old").value,
           
           opsi_a: document.getElementById("adm-soal-opsi-a").value,
-          img_a: imgABase64,
+          img_a: newImgA || document.getElementById("adm-soal-img-a-old").value,
           
           opsi_b: document.getElementById("adm-soal-opsi-b").value,
-          img_b: imgBBase64,
+          img_b: newImgB || document.getElementById("adm-soal-img-b-old").value,
           
           opsi_c: document.getElementById("adm-soal-opsi-c").value || "",
-          img_c: imgCBase64,
+          img_c: newImgC || document.getElementById("adm-soal-img-c-old").value,
           
           opsi_d: document.getElementById("adm-soal-opsi-d").value || "",
-          img_d: imgDBase64,
+          img_d: newImgD || document.getElementById("adm-soal-img-d-old").value,
           
           opsi_e: document.getElementById("adm-soal-opsi-e").value || "",
-          img_e: imgEBase64,
+          img_e: newImgE || document.getElementById("adm-soal-img-e-old").value,
           
           jawaban: document.getElementById("adm-soal-rules").value.toUpperCase(),
           pembahasan: document.getElementById("adm-soal-pembahasan").value || "",
-          createdAt: new Date().toISOString()
+          updatedAt: new Date().toISOString()
         };
 
-        await addDoc(collection(db, "soal"), payload);
-        window.tutupModalDialog();
-        window.bukaModalDialog("Berhasil", "Soal beserta file gambar berhasil disimpan!");
-        document.getElementById("form-admin-soal").reset();
+        if (editId) {
+          // UPDATE SOAL
+          await updateDoc(doc(db, "soal", editId), payload);
+          window.tutupModalDialog();
+          window.bukaModalDialog("Berhasil", "Perubahan soal berhasil diperbarui!");
+        } else {
+          // TAMBAH SOAL BARU
+          payload.createdAt = new Date().toISOString();
+          await addDoc(collection(db, "soal"), payload);
+          window.tutupModalDialog();
+          window.bukaModalDialog("Berhasil", "Soal baru berhasil disimpan ke database!");
+        }
+
+        window.batalEditSoal();
+        window.adminLoadDaftarSoal();
       } catch(err) {
         window.tutupModalDialog();
         window.bukaModalDialog("Gagal Menyimpan", err.message);
       }
     };
 
-    // IMPORT SOAL MASSAL (JSON)
-    window.adminImportMassal = async function(e) {
-      e.preventDefault();
-      const rawJson = document.getElementById("adm-import-json").value;
+    // LOAD DAFTAR SOAL UNTUK ADMIN EDIT / HAPUS
+    window.adminLoadDaftarSoal = async function() {
+      const tbody = document.getElementById("adm-tabel-soal-body");
+      tbody.innerHTML = `<tr><td colspan="5" class="py-4 text-center">Memuat daftar soal...</td></tr>`;
 
       try {
-        const dataArr = JSON.parse(rawJson);
-        if (!Array.isArray(dataArr)) throw new Error("Format harus berupa Array JSON [ {...}, {...} ]");
+        const snap = await getDocs(collection(db, "soal"));
+        tbody.innerHTML = "";
+        window.semuaSoalCache = [];
 
-        window.bukaModalDialog("Proses Import...", `Mengunggah ${dataArr.length} soal ke database...`);
-
-        for (const item of dataArr) {
-          await addDoc(collection(db, "soal"), {
-            jenis: item.jenis || "latihan",
-            paket: item.paket || "IMPORT MASSAL",
-            soal: item.soal || "",
-            gambar_soal: item.gambar_soal || "",
-            opsi_a: item.opsi_a || "", img_a: item.img_a || "",
-            opsi_b: item.opsi_b || "", img_b: item.img_b || "",
-            opsi_c: item.opsi_c || "", img_c: item.img_c || "",
-            opsi_d: item.opsi_d || "", img_d: item.img_d || "",
-            opsi_e: item.opsi_e || "", img_e: item.img_e || "",
-            jawaban: (item.jawaban || "A").toUpperCase(),
-            pembahasan: item.pembahasan || "",
-            createdAt: new Date().toISOString()
-          });
+        if(snap.empty) {
+          tbody.innerHTML = `<tr><td colspan="5" class="py-4 text-center text-slate-400">Belum ada soal di database.</td></tr>`;
+          return;
         }
 
-        window.tutupModalDialog();
-        window.bukaModalDialog("Berhasil", `Sukses mengimpor ${dataArr.length} soal ke database Firebase!`);
-        document.getElementById("adm-import-json").value = "";
-      } catch (err) {
-        window.tutupModalDialog();
-        window.bukaModalDialog("Gagal Import", "JSON Tidak Valid: " + err.message);
+        snap.forEach(d => {
+          const item = { id: d.id, ...d.data() };
+          window.semuaSoalCache.push(item);
+
+          tbody.innerHTML += `
+            <tr class="hover:bg-slate-50 border-b">
+              <td class="py-3 px-3 uppercase text-[10px] font-black">${item.jenis || 'latihan'}</td>
+              <td class="py-3 px-3 font-bold text-indigo-900">${item.paket || 'TANPA PAKET'}</td>
+              <td class="py-3 px-3 truncate max-w-xs">${item.soal}</td>
+              <td class="py-3 px-3 font-black text-emerald-600">${item.jawaban}</td>
+              <td class="py-3 px-3 text-center space-x-2">
+                 <button onclick="window.persiapkanEditSoal('${item.id}')" class="px-2.5 py-1 bg-amber-500 text-white rounded-lg text-[10px] font-bold">Edit</button>
+                 <button onclick="window.hapusSoal('${item.id}')" class="px-2.5 py-1 bg-red-600 text-white rounded-lg text-[10px] font-bold">Hapus</button>
+              </td>
+            </tr>`;
+        });
+      } catch(e) {
+        tbody.innerHTML = `<tr><td colspan="5" class="py-4 text-center text-red-500">${e.message}</td></tr>`;
       }
     };
 
-    // SUBMIT MATERI
+    window.persiapkanEditSoal = function(id) {
+      const target = window.semuaSoalCache.find(s => s.id === id);
+      if(!target) return;
+
+      document.getElementById("adm-edit-id").value = target.id;
+      document.getElementById("adm-soal-jenis").value = target.jenis || "latihan";
+      document.getElementById("adm-soal-paket").value = target.paket || "";
+      document.getElementById("adm-soal-teks").value = target.soal || "";
+
+      document.getElementById("adm-soal-gambar-old").value = target.gambar_soal || "";
+      document.getElementById("adm-soal-opsi-a").value = target.opsi_a || "";
+      document.getElementById("adm-soal-img-a-old").value = target.img_a || "";
+
+      document.getElementById("adm-soal-opsi-b").value = target.opsi_b || "";
+      document.getElementById("adm-soal-img-b-old").value = target.img_b || "";
+
+      document.getElementById("adm-soal-opsi-c").value = target.opsi_c || "";
+      document.getElementById("adm-soal-img-c-old").value = target.img_c || "";
+
+      document.getElementById("adm-soal-opsi-d").value = target.opsi_d || "";
+      document.getElementById("adm-soal-img-d-old").value = target.img_d || "";
+
+      document.getElementById("adm-soal-opsi-e").value = target.opsi_e || "";
+      document.getElementById("adm-soal-img-e-old").value = target.img_e || "";
+
+      document.getElementById("adm-soal-rules").value = target.jawaban || "A";
+      document.getElementById("adm-soal-pembahasan").value = target.pembahasan || "";
+
+      document.getElementById("adm-soal-form-title").innerText = "Edit Soal (Mode Perubahan)";
+      document.getElementById("btn-submit-soal").innerText = "SIMPAN PERUBAHAN SOAL";
+      document.getElementById("btn-batal-edit").classList.remove("hidden");
+
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    };
+
+    window.batalEditSoal = function() {
+      document.getElementById("form-admin-soal").reset();
+      document.getElementById("adm-edit-id").value = "";
+      document.getElementById("adm-soal-gambar-old").value = "";
+      document.getElementById("adm-soal-img-a-old").value = "";
+      document.getElementById("adm-soal-img-b-old").value = "";
+      document.getElementById("adm-soal-img-c-old").value = "";
+      document.getElementById("adm-soal-img-d-old").value = "";
+      document.getElementById("adm-soal-img-e-old").value = "";
+
+      document.getElementById("adm-soal-form-title").innerText = "Tambah Soal Baru";
+      document.getElementById("btn-submit-soal").innerText = "SIMPAN SOAL KE FIREBASE";
+      document.getElementById("btn-batal-edit").classList.add("hidden");
+    };
+
+    window.hapusSoal = async function(id) {
+      if(confirm("Apakah Anda yakin ingin menghapus soal ini dari database?")) {
+        try {
+          window.bukaModalDialog("Memproses...", "Menghapus soal...");
+          await deleteDoc(doc(db, "soal", id));
+          window.tutupModalDialog();
+          window.adminLoadDaftarSoal();
+        } catch(e) {
+          window.tutupModalDialog();
+          window.bukaModalDialog("Gagal Hapus", e.message);
+        }
+      }
+    };
+
+    // IMPORT SOAL MASSAL EXCEL (.XLSX / .XLS) DAN CSV
+    window.adminImportExcel = function(e) {
+      e.preventDefault();
+      const fileInput = document.getElementById("adm-import-excel-file");
+      if(!fileInput.files || !fileInput.files[0]) return;
+
+      const file = fileInput.files[0];
+      const reader = new FileReader();
+
+      reader.onload = async function(e) {
+        try {
+          window.bukaModalDialog("Membaca File...", "Menganalisis isi spreadsheet...");
+          const data = new Uint8Array(e.target.result);
+          const workbook = XLSX.read(data, { type: 'array' });
+          const firstSheetName = workbook.SheetNames[0];
+          const worksheet = workbook.Sheets[firstSheetName];
+          const jsonData = XLSX.utils.sheet_to_json(worksheet);
+
+          if (jsonData.length === 0) {
+            throw new Error("File kosong atau format header tidak sesuai.");
+          }
+
+          window.bukaModalDialog("Mengunggah...", `Mengunggah ${jsonData.length} soal ke database Firebase...`);
+
+          for (const item of jsonData) {
+            await addDoc(collection(db, "soal"), {
+              jenis: (item.jenis || "latihan").toString().toLowerCase().trim(),
+              paket: (item.paket || "PAKET IMPORT").toString().trim().toUpperCase(),
+              soal: (item.soal || "").toString(),
+              gambar_soal: "",
+              opsi_a: (item.opsi_a || "").toString(), img_a: "",
+              opsi_b: (item.opsi_b || "").toString(), img_b: "",
+              opsi_c: (item.opsi_c || "").toString(), img_c: "",
+              opsi_d: (item.opsi_d || "").toString(), img_d: "",
+              opsi_e: (item.opsi_e || "").toString(), img_e: "",
+              jawaban: (item.jawaban || "A").toString().toUpperCase().trim(),
+              pembahasan: (item.pembahasan || "").toString(),
+              createdAt: new Date().toISOString()
+            });
+          }
+
+          window.tutupModalDialog();
+          window.bukaModalDialog("Berhasil", `Berhasil mengimpor ${jsonData.length} soal dari file ke database!`);
+          fileInput.value = "";
+          window.adminLoadDaftarSoal();
+        } catch(err) {
+          window.tutupModalDialog();
+          window.bukaModalDialog("Gagal Import", err.message);
+        }
+      };
+
+      reader.readAsArrayBuffer(file);
+    };
+
+    // FITUR PESERTA: PENGELOMPOKAN PAKET SOAL (LATIHAN & UJIAN)
+    window.bukaPilihPaket = async function(mode) {
+      window.bukaModalDialog("Memuat...", "Membaca paket soal...");
+      try {
+        const snap = await getDocs(collection(db, "soal"));
+        window.tutupModalDialog();
+
+        const paketMap = {};
+
+        snap.forEach(d => {
+          const item = { id: d.id, ...d.data() };
+          const itemJenis = item.jenis || "latihan";
+          
+          if(itemJenis === mode) {
+            const namaPaket = item.paket || "PAKET UMUM";
+            if(!paketMap[namaPaket]) paketMap[namaPaket] = [];
+            paketMap[namaPaket].push(item);
+          }
+        });
+
+        const listContainer = document.getElementById("list-paket-container");
+        listContainer.innerHTML = "";
+
+        const keys = Object.keys(paketMap);
+        if(keys.length === 0) {
+          listContainer.innerHTML = `
+            <div class="col-span-full bg-white p-8 rounded-3xl text-center border space-y-2">
+               <p class="text-sm font-bold text-slate-600">Belum ada paket ${mode === 'ujian' ? 'Simulasi Ujian' : 'Latihan Mandiri'} yang tersedia.</p>
+               <p class="text-xs text-slate-400">Silakan tanyakan kepada admin untuk penginputan paket soal.</p>
+            </div>`;
+        } else {
+          keys.forEach(paketName => {
+            const jumlahSoal = paketMap[paketName].length;
+            listContainer.innerHTML += `
+              <div class="bg-white p-6 rounded-3xl border border-slate-200 hover:border-indigo-500 shadow-sm transition space-y-4 flex flex-col justify-between">
+                 <div class="space-y-1">
+                    <span class="px-2.5 py-1 bg-indigo-50 text-indigo-600 rounded-lg text-[10px] font-black uppercase">${mode === 'ujian' ? 'SIMULASI UJIAN' : 'LATIHAN MANDIRI'}</span>
+                    <h3 class="font-black text-slate-800 text-base pt-1">${paketName}</h3>
+                    <p class="text-xs text-slate-400">Terdiri dari <b>${jumlahSoal}</b> butir soal.</p>
+                 </div>
+                 <button onclick="window.mulaiMengerjakanPaket('${mode}', '${paketName}')" class="w-full py-3 bg-indigo-600 hover:bg-indigo-700 text-white font-black text-xs rounded-2xl shadow-md transition">
+                    MULAI KERJAKAN &rarr;
+                 </button>
+              </div>`;
+          });
+        }
+
+        document.getElementById("pilih-paket-kategori").innerText = mode === "ujian" ? "SIMULASI PAKET UJIAN" : "LATIHAN MANDIRI";
+        document.getElementById("pilih-paket-judul").innerText = mode === "ujian" ? "Pilih Paket Ujian" : "Pilih Paket Latihan Mandiri";
+
+        document.getElementById("dash-peserta").classList.add("hidden");
+        document.getElementById("area-pilih-paket").classList.remove("hidden");
+      } catch(e) {
+        window.tutupModalDialog();
+        window.bukaModalDialog("Gagal Memuat", e.message);
+      }
+    };
+
+    window.mulaiMengerjakanPaket = async function(mode, paketName) {
+      window.bukaModalDialog("Menyiapkan...", "Mengambil butir soal...");
+      
+      const snap = await getDocs(collection(db, "soal"));
+      window.tutupModalDialog();
+
+      const list = [];
+      snap.forEach(d => {
+        const item = { id: d.id, ...d.data() };
+        if((item.jenis || "latihan") === mode && (item.paket || "PAKET UMUM") === paketName) {
+          list.push(item);
+        }
+      });
+
+      window.st.jenis = mode;
+      window.st.soal = list;
+      window.st.idx = 0;
+      window.st.jwb = {};
+
+      document.getElementById("area-pilih-paket").classList.add("hidden");
+      document.getElementById("area-latihan-soal").classList.remove("hidden");
+
+      if(mode === "ujian") {
+        document.getElementById("mode-badge").innerText = "SIMULASI PAKET UJIAN";
+        document.getElementById("status-mode-tag").innerText = "SIMULASI UJIAN";
+        document.getElementById("timer-box").classList.remove("hidden");
+        document.getElementById("btn-cek-jawaban").classList.add("hidden"); // Ujian tidak tampil kunci langsung
+        
+        // Timer Ujian (Contoh: 1 Menit per Soal)
+        let sisaDetik = list.length * 60;
+        if(window.st.timerInterval) clearInterval(window.st.timerInterval);
+        
+        window.st.timerInterval = setInterval(() => {
+          sisaDetik--;
+          const m = Math.floor(sisaDetik / 60);
+          const s = sisaDetik % 60;
+          document.getElementById("timer-count").innerText = `${m < 10 ? '0'+m : m}:${s < 10 ? '0'+s : s}`;
+          
+          if(sisaDetik <= 0) {
+            clearInterval(window.st.timerInterval);
+            window.bukaModalDialog("Waktu Habis!", "Waktu pengerjaan ujian telah selesai.");
+            window.kembaliKeDash();
+          }
+        }, 1000);
+
+      } else {
+        document.getElementById("mode-badge").innerText = "MODE LATIHAN MANDIRI";
+        document.getElementById("status-mode-tag").innerText = "LATIHAN MANDIRI";
+        document.getElementById("timer-box").classList.add("hidden");
+        document.getElementById("btn-cek-jawaban").classList.remove("hidden");
+        if(window.st.timerInterval) clearInterval(window.st.timerInterval);
+      }
+
+      tampilkanSoalLatihan();
+    };
+
+    function tampilkanSoalLatihan() {
+      const s = window.st.soal[window.st.idx];
+      
+      document.getElementById("latihan-info-judul").innerText = `${s.paket || 'Latihan'} (${window.st.idx + 1}/${window.st.soal.length})`;
+      document.getElementById("latihan-no-soal").innerText = `Soal Nomor ${window.st.idx + 1}`;
+      document.getElementById("latihan-teks-soal").innerText = s.soal;
+
+      // Render Gambar Soal
+      const imgContainer = document.getElementById("latihan-gambar-container");
+      const imgSoal = document.getElementById("latihan-gambar-soal");
+      if (s.gambar_soal && s.gambar_soal.trim() !== "") {
+        imgSoal.src = s.gambar_soal;
+        imgContainer.classList.remove("hidden");
+      } else {
+        imgContainer.classList.add("hidden");
+      }
+
+      document.getElementById("latihan-blok-pembahasan").classList.add("hidden");
+
+      // Render Opsi Jawaban
+      const bOpsi = document.getElementById("latihan-list-opsi");
+      bOpsi.innerHTML = "";
+
+      const jwbDipilih = window.st.jwb[window.st.idx];
+
+      ["a", "b", "c", "d", "e"].forEach(k => {
+        const keyText = "opsi_" + k;
+        const keyImg = "img_" + k;
+        const huruf = k.toUpperCase();
+
+        if (s[keyText] && s[keyText].trim() !== "") {
+          const gambarOpsiHtml = (s[keyImg] && s[keyImg].trim() !== "") 
+            ? `<img src="${s[keyImg]}" class="mt-2 max-h-40 rounded-lg object-contain border" alt="Opsi ${huruf}">` 
+            : "";
+
+          const isSelected = jwbDipilih === huruf;
+          const classStyle = isSelected 
+            ? "w-full text-left p-4 bg-indigo-50 border-2 border-indigo-600 rounded-2xl transition" 
+            : "w-full text-left p-4 bg-slate-50 border border-slate-200 rounded-2xl hover:bg-slate-100 transition";
+
+          bOpsi.innerHTML += `
+            <button onclick="pilihOpsiLatihan('${huruf}')" id="btn-opsi-${huruf}" class="${classStyle}">
+               <div class="flex items-start gap-3">
+                  <span class="w-7 h-7 rounded-lg bg-indigo-100 text-indigo-700 flex items-center justify-center text-xs font-black shrink-0">${huruf}</span>
+                  <div class="flex-1">
+                     <p class="text-sm text-slate-800">${s[keyText]}</p>
+                     ${gambarOpsiHtml}
+                  </div>
+               </div>
+            </button>`;
+        }
+      });
+    }
+
+    window.pilihOpsiLatihan = function(opsi) {
+      window.st.jwb[window.st.idx] = opsi;
+      ["A", "B", "C", "D", "E"].forEach(h => {
+        const el = document.getElementById(`btn-opsi-${h}`);
+        if (el) {
+          if (h === opsi) {
+            el.className = "w-full text-left p-4 bg-indigo-50 border-2 border-indigo-600 rounded-2xl transition";
+          } else {
+            el.className = "w-full text-left p-4 bg-slate-50 border border-slate-200 rounded-2xl hover:bg-slate-100 transition";
+          }
+        }
+      });
+    };
+
+    window.cekJawabanLatihan = function() {
+      const s = window.st.soal[window.st.idx];
+      const jwbUser = window.st.jwb[window.st.idx] || "Belum Dijawab";
+      
+      document.getElementById("latihan-teks-pembahasan").innerText = `Jawaban Anda: ${jwbUser}\nKunci Jawaban: ${s.jawaban}\n\nPembahasan:\n${s.pembahasan || 'Tidak ada pembahasan.'}`;
+      document.getElementById("latihan-blok-pembahasan").classList.remove("hidden");
+    };
+
+    window.geserLatihanLanjut = function() {
+      if (window.st.idx + 1 < window.st.soal.length) {
+        window.st.idx++;
+        tampilkanSoalLatihan();
+      } else {
+        if(window.st.timerInterval) clearInterval(window.st.timerInterval);
+        
+        if(window.st.jenis === "ujian") {
+          let benar = 0;
+          window.st.soal.forEach((s, i) => {
+            if(window.st.jwb[i] === s.jawaban) benar++;
+          });
+          const nilai = Math.round((benar / window.st.soal.length) * 100);
+          window.bukaModalDialog("Ujian Selesai!", `Hasil Ujian Anda:\nBenar: ${benar} dari ${window.st.soal.length} Soal\nNilai Akhir: ${nilai}`);
+        } else {
+          window.bukaModalDialog("Selesai", "Anda telah menyelesaikan seluruh soal dalam paket ini!");
+        }
+        window.kembaliKeDash();
+      }
+    };
+
+    // SUBMIT MATERI & INFORMASI
     window.adminSubmitMateri = async function(e) {
       e.preventDefault();
       try {
@@ -665,7 +1056,6 @@
       }
     };
 
-    // SUBMIT INFORMASI
     window.adminSubmitInformasi = async function(e) {
       e.preventDefault();
       try {
@@ -717,121 +1107,7 @@
       window.adminLoadDaftarPeserta();
     };
 
-    // MODE LATIHAN PESERTA
-    window.mulaiLatihan = async function() {
-      window.bukaModalDialog("Memuat...", "Membaca data soal dari Firebase...");
-      
-      try {
-        const snap = await getDocs(collection(db, "soal"));
-        window.tutupModalDialog();
-
-        const list = [];
-        snap.forEach(d => {
-          const data = d.data();
-          if(!data.jenis || data.jenis === "latihan") {
-            list.push({ id: d.id, ...data });
-          }
-        });
-
-        if (list.length === 0) {
-          window.bukaModalDialog("Kosong", "Belum ada soal latihan di database Firebase. Silakan input dari menu admin.");
-          return;
-        }
-
-        window.st.jenis = "latihan";
-        window.st.soal = list;
-        window.st.idx = 0;
-        window.st.jwb = {};
-
-        document.getElementById("dash-peserta").classList.add("hidden");
-        document.getElementById("area-latihan-soal").classList.remove("hidden");
-        tampilkanSoalLatihan();
-      } catch (err) {
-        window.tutupModalDialog();
-        window.bukaModalDialog("Gagal Memuat Soal", err.message);
-      }
-    };
-
-    function tampilkanSoalLatihan() {
-      const s = window.st.soal[window.st.idx];
-      
-      document.getElementById("latihan-info-judul").innerText = `${s.paket || 'Latihan Mandiri'} (${window.st.idx + 1}/${window.st.soal.length})`;
-      document.getElementById("latihan-no-soal").innerText = `Soal Nomor ${window.st.idx + 1}`;
-      document.getElementById("latihan-teks-soal").innerText = s.soal;
-
-      // Render Gambar Soal
-      const imgContainer = document.getElementById("latihan-gambar-container");
-      const imgSoal = document.getElementById("latihan-gambar-soal");
-      if (s.gambar_soal && s.gambar_soal.trim() !== "") {
-        imgSoal.src = s.gambar_soal;
-        imgContainer.classList.remove("hidden");
-      } else {
-        imgContainer.classList.add("hidden");
-      }
-
-      document.getElementById("latihan-blok-pembahasan").classList.add("hidden");
-
-      // Render Opsi Jawaban
-      const bOpsi = document.getElementById("latihan-list-opsi");
-      bOpsi.innerHTML = "";
-
-      ["a", "b", "c", "d", "e"].forEach(k => {
-        const keyText = "opsi_" + k;
-        const keyImg = "img_" + k;
-        const huruf = k.toUpperCase();
-
-        if (s[keyText] && s[keyText].trim() !== "") {
-          const gambarOpsiHtml = (s[keyImg] && s[keyImg].trim() !== "") 
-            ? `<img src="${s[keyImg]}" class="mt-2 max-h-40 rounded-lg object-contain border" alt="Opsi ${huruf}">` 
-            : "";
-
-          bOpsi.innerHTML += `
-            <button onclick="pilihOpsiLatihan('${huruf}')" id="btn-opsi-${huruf}" class="w-full text-left p-4 bg-slate-50 border border-slate-200 rounded-2xl hover:bg-slate-100 transition">
-               <div class="flex items-start gap-3">
-                  <span class="w-7 h-7 rounded-lg bg-indigo-100 text-indigo-700 flex items-center justify-center text-xs font-black shrink-0">${huruf}</span>
-                  <div class="flex-1">
-                     <p class="text-sm text-slate-800">${s[keyText]}</p>
-                     ${gambarOpsiHtml}
-                  </div>
-               </div>
-            </button>`;
-        }
-      });
-    }
-
-    window.pilihOpsiLatihan = function(opsi) {
-      window.st.jwb[window.st.idx] = opsi;
-      ["A", "B", "C", "D", "E"].forEach(h => {
-        const el = document.getElementById(`btn-opsi-${h}`);
-        if (el) {
-          if (h === opsi) {
-            el.className = "w-full text-left p-4 bg-indigo-50 border-2 border-indigo-600 rounded-2xl transition";
-          } else {
-            el.className = "w-full text-left p-4 bg-slate-50 border border-slate-200 rounded-2xl hover:bg-slate-100 transition";
-          }
-        }
-      });
-    };
-
-    window.cekJawabanLatihan = function() {
-      const s = window.st.soal[window.st.idx];
-      const jwbUser = window.st.jwb[window.st.idx] || "Belum Dijawab";
-      
-      document.getElementById("latihan-teks-pembahasan").innerText = `Jawaban Anda: ${jwbUser}\nKunci Jawaban: ${s.jawaban}\n\nPembahasan:\n${s.pembahasan || 'Tidak ada pembahasan.'}`;
-      document.getElementById("latihan-blok-pembahasan").classList.remove("hidden");
-    };
-
-    window.geserLatihanLanjut = function() {
-      if (window.st.idx + 1 < window.st.soal.length) {
-        window.st.idx++;
-        tampilkanSoalLatihan();
-      } else {
-        window.bukaModalDialog("Selesai", "Anda telah menyelesaikan seluruh soal dalam paket ini!");
-        window.kembaliKeDash();
-      }
-    };
-
-    // INFORMASI & MATERI
+    // MENU INFORMASI & MATERI PESERTA
     window.bukaMenuInformasi = async function() {
       window.bukaModalDialog("Memuat...", "Mengambil informasi...");
       const snap = await getDocs(collection(db, "informasi"));
@@ -887,10 +1163,6 @@
       document.getElementById("area-materi").classList.remove("hidden");
     };
 
-    window.bukaMenuPaketUjian = function() {
-      window.bukaModalDialog("Info", "Silakan manfaatkan menu Latihan Mandiri untuk mengerjakan bank soal yang diinputkan.");
-    };
-
     window.bukaProfil = function() {
       window.bukaModalDialog("Profil Akun", `Nama: ${window.uAktif.nama}\nEmail: ${window.uAktif.email}\nTipe: ${(window.uAktif.tipe || 'free').toUpperCase()}`);
     };
@@ -913,7 +1185,10 @@
     };
 
     window.kembaliKeDash = function() {
+       if(window.st.timerInterval) clearInterval(window.st.timerInterval);
+
        document.getElementById("area-informasi").classList.add("hidden");
+       document.getElementById("area-pilih-paket").classList.add("hidden");
        document.getElementById("area-latihan-soal").classList.add("hidden");
        document.getElementById("area-materi").classList.add("hidden");
        
