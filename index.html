@@ -508,7 +508,7 @@
         const userDoc = await getDoc(doc(db, "users", user.uid));
         if (userDoc.exists()) {
           window.uAktif = { uid: user.uid, email: user.email, ...userDoc.data() };
-          renderHeaderProfil();
+          window.renderHeaderProfil();
           document.getElementById("auth-panel").classList.add("hidden");
           document.getElementById("app-header").classList.remove("hidden");
 
@@ -519,6 +519,7 @@
             document.getElementById("dash-admin").classList.add("hidden");
             document.getElementById("dash-peserta").classList.remove("hidden");
             document.getElementById("dash-salam-nama").innerText = window.uAktif.nama;
+            document.getElementById("dash-tipe-badge").innerText = (window.uAktif.tipe || "FREE").toUpperCase();
           }
         }
       } else {
@@ -539,7 +540,7 @@
       const pass = document.getElementById("reg-password").value;
 
       try {
-        bukaModalDialog("Memproses...", "Mendaftarkan akun ke server...");
+        window.bukaModalDialog("Memproses...", "Mendaftarkan akun ke server...");
         const res = await createUserWithEmailAndPassword(auth, email, pass);
         await setDoc(doc(db, "users", res.user.uid), {
           nama: nama,
@@ -548,11 +549,11 @@
           tipe: "free",
           createdAt: new Date().toISOString()
         });
-        tutupModalDialog();
-        bukaModalDialog("Berhasil", "Akun berhasil dibuat!");
+        window.tutupModalDialog();
+        window.bukaModalDialog("Berhasil", "Akun berhasil dibuat!");
       } catch (err) {
-        tutupModalDialog();
-        bukaModalDialog("Gagal Registrasi", err.message);
+        window.tutupModalDialog();
+        window.bukaModalDialog("Gagal Registrasi", err.message);
       }
     };
 
@@ -563,12 +564,12 @@
       const pass = document.getElementById("log-password").value;
 
       try {
-        bukaModalDialog("Memproses...", "Mencoba masuk...");
+        window.bukaModalDialog("Memproses...", "Mencoba masuk...");
         await signInWithEmailAndPassword(auth, email, pass);
-        tutupModalDialog();
+        window.tutupModalDialog();
       } catch (err) {
-        tutupModalDialog();
-        bukaModalDialog("Gagal Login", "Email atau Password salah.");
+        window.tutupModalDialog();
+        window.bukaModalDialog("Gagal Login", "Email atau Password salah.");
       }
     };
 
@@ -578,11 +579,24 @@
       location.reload();
     };
 
+    // TAB ADMIN HANDLER
+    window.pilihTabAdmin = function(tabName) {
+      const panels = ['admin-soal', 'admin-materi', 'admin-informasi', 'admin-peserta'];
+      panels.forEach(p => {
+        document.getElementById(`panel-${p}`).classList.add('hidden');
+      });
+      document.getElementById(`panel-${tabName}`).classList.remove('hidden');
+
+      if(tabName === 'admin-peserta') {
+        window.adminLoadDaftarPeserta();
+      }
+    };
+
     // ADMIN SUBMIT SOAL
     window.adminSubmitSoal = async function(e) {
       e.preventDefault();
       try {
-        bukaModalDialog("Mengunggah...", "Menyimpan soal ke Firestore...");
+        window.bukaModalDialog("Mengunggah...", "Menyimpan soal ke Firestore...");
         await addDoc(collection(db, "soal"), {
           jenis: document.getElementById("adm-soal-jenis").value,
           paket: document.getElementById("adm-soal-paket").value,
@@ -596,27 +610,104 @@
           jawaban: document.getElementById("adm-soal-rules").value.toUpperCase(),
           pembahasan: document.getElementById("adm-soal-pembahasan").value
         });
-        tutupModalDialog();
-        bukaModalDialog("Berhasil", "Soal tersimpan!");
+        window.tutupModalDialog();
+        window.bukaModalDialog("Berhasil", "Soal tersimpan!");
         document.getElementById("form-admin-soal").reset();
       } catch(err) {
-        tutupModalDialog();
-        bukaModalDialog("Gagal", err.message);
+        window.tutupModalDialog();
+        window.bukaModalDialog("Gagal", err.message);
       }
+    };
+
+    // ADMIN SUBMIT MATERI
+    window.adminSubmitMateri = async function(e) {
+      e.preventDefault();
+      try {
+        window.bukaModalDialog("Mengunggah...", "Menyimpan materi PRO...");
+        await addDoc(collection(db, "materi"), {
+          judul: document.getElementById("adm-materi-judul").value,
+          isi: document.getElementById("adm-materi-isi").value,
+          gambar: document.getElementById("adm-materi-gambar").value || "",
+          video: document.getElementById("adm-materi-video").value || "",
+          link: document.getElementById("adm-materi-link").value || "",
+          createdAt: new Date().toISOString()
+        });
+        window.tutupModalDialog();
+        window.bukaModalDialog("Berhasil", "Materi PRO tersimpan!");
+        document.getElementById("form-admin-materi").reset();
+      } catch(err) {
+        window.tutupModalDialog();
+        window.bukaModalDialog("Gagal", err.message);
+      }
+    };
+
+    // ADMIN SUBMIT INFORMASI
+    window.adminSubmitInformasi = async function(e) {
+      e.preventDefault();
+      try {
+        window.bukaModalDialog("Mengunggah...", "Mempublikasikan informasi...");
+        await addDoc(collection(db, "informasi"), {
+          judul: document.getElementById("adm-info-judul").value,
+          teks: document.getElementById("adm-info-teks").value,
+          gambar: document.getElementById("adm-info-gambar").value || "",
+          video: document.getElementById("adm-info-video").value || "",
+          createdAt: new Date().toISOString()
+        });
+        window.tutupModalDialog();
+        window.bukaModalDialog("Berhasil", "Informasi berhasil dipublikasikan!");
+        document.getElementById("form-admin-informasi").reset();
+      } catch(err) {
+        window.tutupModalDialog();
+        window.bukaModalDialog("Gagal", err.message);
+      }
+    };
+
+    // ADMIN LOAD PESERTA
+    window.adminLoadDaftarPeserta = async function() {
+      const tbody = document.getElementById("adm-tabel-peserta-body");
+      tbody.innerHTML = `<tr><td colspan="5" class="py-4 text-center">Memuat data...</td></tr>`;
+      
+      const q = query(collection(db, "users"), where("role", "==", "peserta"));
+      const snap = await getDocs(q);
+      tbody.innerHTML = "";
+
+      snap.forEach(d => {
+        const data = d.data();
+        tbody.innerHTML += `
+          <tr class="hover:bg-slate-50">
+            <td class="py-3 px-4 font-bold">${data.nama || '-'}</td>
+            <td class="py-3 px-4">${data.email || '-'}</td>
+            <td class="py-3 px-4">${data.hp || '-'}</td>
+            <td class="py-3 px-4">
+              <span class="px-2 py-0.5 text-[10px] font-bold rounded ${data.tipe === 'pro' ? 'bg-amber-100 text-amber-800' : 'bg-slate-100 text-slate-600'}">${(data.tipe || 'free').toUpperCase()}</span>
+            </td>
+            <td class="py-3 px-4 text-center">
+              <button onclick="window.toggleStatusPro('${d.id}', '${data.tipe || 'free'}')" class="text-xs text-indigo-600 hover:underline font-bold">
+                ${data.tipe === 'pro' ? 'Ubah ke FREE' : 'Ubah ke PRO'}
+              </button>
+            </td>
+          </tr>`;
+      });
+    };
+
+    window.toggleStatusPro = async function(uid, statusSekarang) {
+      const tipeBaru = statusSekarang === 'pro' ? 'free' : 'pro';
+      await updateDoc(doc(db, "users", uid), { tipe: tipeBaru });
+      window.adminLoadDaftarPeserta();
     };
 
     // AMBIL DATA LATIHAN SOAL
     window.mulaiLatihan = async function() {
-      bukaModalDialog("Memuat...", "Mengambil daftar soal...");
+      window.bukaModalDialog("Memuat...", "Mengambil daftar soal...");
       const q = query(collection(db, "soal"), where("jenis", "==", "latihan"));
       const snap = await getDocs(q);
-      tutupModalDialog();
+      window.tutupModalDialog();
       
       const list = [];
       snap.forEach(d => list.push({ id: d.id, ...d.data() }));
 
       if (list.length === 0) {
-        bukaModalDialog("Info", "Belum ada soal latihan.");
+        window.bukaModalDialog("Info", "Belum ada soal latihan.");
         return;
       }
 
@@ -670,8 +761,86 @@
         window.st.idx++;
         tampilkanSoalLatihan();
       } else {
-        bukaModalDialog("Selesai", "Anda telah menyelesaikan seluruh latihan!");
-        kembaliKeDash();
+        window.bukaModalDialog("Selesai", "Anda telah menyelesaikan seluruh latihan!");
+        window.kembaliKeDash();
+      }
+    };
+
+    // MENU INFORMASI PESERTA
+    window.bukaMenuInformasi = async function() {
+      window.bukaModalDialog("Memuat...", "Mengambil informasi terbaru...");
+      const snap = await getDocs(collection(db, "informasi"));
+      window.tutupModalDialog();
+
+      const container = document.getElementById("list-informasi");
+      container.innerHTML = "";
+
+      if(snap.empty) {
+        container.innerHTML = `<p class="text-xs text-slate-400">Belum ada informasi dipublikasikan.</p>`;
+      } else {
+        snap.forEach(d => {
+          const info = d.data();
+          container.innerHTML += `
+            <div class="bg-white p-6 rounded-3xl border border-slate-200 space-y-3">
+              <h3 class="font-black text-slate-800 text-base">${info.judul}</h3>
+              <p class="text-xs text-slate-600 leading-relaxed whitespace-pre-line">${info.teks}</p>
+            </div>`;
+        });
+      }
+
+      document.getElementById("dash-peserta").classList.add("hidden");
+      document.getElementById("area-informasi").classList.remove("hidden");
+    };
+
+    // MENU MATERI PESERTA
+    window.bukaMenuMateri = async function() {
+      if(window.uAktif.tipe !== 'pro') {
+        window.bukaModalUpgrade();
+        return;
+      }
+
+      window.bukaModalDialog("Memuat...", "Mengambil materi PRO...");
+      const snap = await getDocs(collection(db, "materi"));
+      window.tutupModalDialog();
+
+      const container = document.getElementById("list-materi");
+      container.innerHTML = "";
+
+      if(snap.empty) {
+        container.innerHTML = `<p class="text-xs text-slate-400">Belum ada materi pembelajaran.</p>`;
+      } else {
+        snap.forEach(d => {
+          const mat = d.data();
+          container.innerHTML += `
+            <div class="bg-white p-6 rounded-3xl border border-slate-200 space-y-3">
+              <h3 class="font-black text-slate-800 text-base">${mat.judul}</h3>
+              <p class="text-xs text-slate-600 leading-relaxed whitespace-pre-line">${mat.isi}</p>
+            </div>`;
+        });
+      }
+
+      document.getElementById("dash-peserta").classList.add("hidden");
+      document.getElementById("area-materi").classList.remove("hidden");
+    };
+
+    // PLACEHOLDER PAKET UJIAN
+    window.bukaMenuPaketUjian = function() {
+      window.bukaModalDialog("Info", "Fitur Simulasi Paket Ujian sedang dalam tahap pengembangan.");
+    };
+
+    window.bukaProfil = function() {
+      window.bukaModalDialog("Profil Anda", `Nama: ${window.uAktif.nama}\nEmail: ${window.uAktif.email}\nTipe: ${(window.uAktif.tipe || 'free').toUpperCase()}`);
+    };
+
+    window.sinkronkanTipeAkun = async function() {
+      if(!window.uAktif) return;
+      window.bukaModalDialog("Sinkronisasi...", "Memeriksa status akun...");
+      const userDoc = await getDoc(doc(db, "users", window.uAktif.uid));
+      if (userDoc.exists()) {
+        window.uAktif = { uid: window.uAktif.uid, email: window.uAktif.email, ...userDoc.data() };
+        document.getElementById("dash-tipe-badge").innerText = (window.uAktif.tipe || "FREE").toUpperCase();
+        window.tutupModalDialog();
+        window.bukaModalDialog("Berhasil", "Status akun Anda telah diperbarui!");
       }
     };
 
@@ -680,6 +849,7 @@
        if(!window.uAktif) return;
        document.getElementById("nama-peserta").innerText = window.uAktif.nama || "Peserta";
        document.getElementById("avatar-peserta").innerText = (window.uAktif.nama || "P").charAt(0);
+       document.getElementById("badge-peserta").innerText = (window.uAktif.tipe || "FREE") + " MEMBER";
     };
 
     window.kembaliKeDash = function() {
@@ -701,9 +871,13 @@
        if (tab === "login") {
           document.getElementById("form-login").classList.remove("hidden");
           document.getElementById("form-daftar").classList.add("hidden");
+          document.getElementById("tab-login-btn").className = "flex-1 py-3 text-center text-xs font-black rounded-xl transition-all duration-200 bg-white shadow text-indigo-600";
+          document.getElementById("tab-daftar-btn").className = "flex-1 py-3 text-center text-xs font-black rounded-xl transition-all duration-200 text-slate-500 hover:text-slate-800";
        } else {
           document.getElementById("form-daftar").classList.remove("hidden");
           document.getElementById("form-login").classList.add("hidden");
+          document.getElementById("tab-daftar-btn").className = "flex-1 py-3 text-center text-xs font-black rounded-xl transition-all duration-200 bg-white shadow text-indigo-600";
+          document.getElementById("tab-login-btn").className = "flex-1 py-3 text-center text-xs font-black rounded-xl transition-all duration-200 text-slate-500 hover:text-slate-800";
        }
     };
 
