@@ -40,7 +40,7 @@
           </div>
         </button>
         <button onclick="keluarSistem()" class="p-2 hover:bg-red-500/20 text-red-400 hover:text-red-300 rounded-xl transition" title="Keluar">
-          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" /></svg>
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 01-3-3h4a3 3 0 013 3v1" /></svg>
         </button>
       </div>
     </div>
@@ -184,7 +184,7 @@
           <button onclick="pilihTabAdmin('admin-peserta')" id="tab-adm-peserta" class="flex-1 py-3 text-center text-xs font-black rounded-xl text-slate-600 hover:text-slate-950 whitespace-nowrap px-4">👥 KELOLA PESERTA</button>
        </div>
 
-       <!-- TAB 1: INPUT SOAL TUNGGAL -->
+       <!-- TAB 1: INPUT SOAL TUNGGAL (UPLOAD GAMBAR DIRECT) -->
        <div id="panel-admin-soal" class="bg-white p-6 sm:p-8 rounded-3xl border border-slate-200 shadow-sm space-y-6">
           <h3 class="text-base font-black text-slate-800">Tambah Soal Tunggal</h3>
           <form id="form-admin-soal" onsubmit="adminSubmitSoal(event)" class="space-y-4">
@@ -206,35 +206,51 @@
                 <label class="block text-[10px] font-black text-slate-400 uppercase mb-1">Teks Pertanyaan Soal</label>
                 <textarea id="adm-soal-teks" required rows="3" class="w-full px-4 py-3 bg-slate-50 border rounded-2xl text-sm" placeholder="Tulis soal di sini..."></textarea>
              </div>
+             
+             <!-- UPLOAD GAMBAR SOAL -->
              <div>
-                <label class="block text-[10px] font-black text-indigo-600 uppercase mb-1">🖼️ URL Gambar Soal (Opsional)</label>
-                <input type="url" id="adm-soal-gambar" class="w-full px-4 py-3 bg-indigo-50/40 border border-indigo-200 rounded-2xl text-sm" placeholder="https://domain.com/gambar-soal.png">
+                <label class="block text-[10px] font-black text-indigo-600 uppercase mb-1">📁 Upload Gambar Soal (Opsional)</label>
+                <input type="file" id="adm-soal-gambar-file" accept="image/*" class="w-full px-4 py-2 bg-indigo-50/40 border border-indigo-200 rounded-2xl text-xs text-slate-600 file:mr-4 file:py-1.5 file:px-3 file:rounded-xl file:border-0 file:text-xs file:font-black file:bg-indigo-600 file:text-white hover:file:bg-indigo-700">
              </div>
 
-             <!-- PILIHAN OPSI DAN GAMBAR OPSI -->
+             <!-- PILIHAN OPSI DAN UPLOAD GAMBAR OPSI -->
              <div class="space-y-4 border-t border-slate-100 pt-4">
-                <p class="text-xs font-black text-slate-600 uppercase">Opsi Jawaban & Gambar Opsi</p>
+                <p class="text-xs font-black text-slate-600 uppercase">Opsi Jawaban & Upload Gambar Opsi</p>
                 
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                   <div class="space-y-1">
-                      <input type="text" id="adm-soal-opsi-a" required class="w-full px-4 py-2.5 bg-slate-50 border rounded-xl text-sm" placeholder="Opsi A (Teks)">
-                      <input type="url" id="adm-soal-img-a" class="w-full px-4 py-2 bg-indigo-50/30 border border-indigo-100 rounded-xl text-xs" placeholder="URL Gambar Opsi A (Opsional)">
+                   <!-- OPSI A -->
+                   <div class="space-y-1 bg-slate-50 p-3 rounded-2xl border">
+                      <input type="text" id="adm-soal-opsi-a" required class="w-full px-3 py-2 bg-white border rounded-xl text-sm" placeholder="Opsi A (Teks)">
+                      <label class="block text-[9px] font-bold text-slate-400 uppercase pt-1">Gambar Opsi A (Opsional)</label>
+                      <input type="file" id="adm-soal-img-a-file" accept="image/*" class="w-full text-xs text-slate-500">
                    </div>
-                   <div class="space-y-1">
-                      <input type="text" id="adm-soal-opsi-b" required class="w-full px-4 py-2.5 bg-slate-50 border rounded-xl text-sm" placeholder="Opsi B (Teks)">
-                      <input type="url" id="adm-soal-img-b" class="w-full px-4 py-2 bg-indigo-50/30 border border-indigo-100 rounded-xl text-xs" placeholder="URL Gambar Opsi B (Opsional)">
+                   
+                   <!-- OPSI B -->
+                   <div class="space-y-1 bg-slate-50 p-3 rounded-2xl border">
+                      <input type="text" id="adm-soal-opsi-b" required class="w-full px-3 py-2 bg-white border rounded-xl text-sm" placeholder="Opsi B (Teks)">
+                      <label class="block text-[9px] font-bold text-slate-400 uppercase pt-1">Gambar Opsi B (Opsional)</label>
+                      <input type="file" id="adm-soal-img-b-file" accept="image/*" class="w-full text-xs text-slate-500">
                    </div>
-                   <div class="space-y-1">
-                      <input type="text" id="adm-soal-opsi-c" class="w-full px-4 py-2.5 bg-slate-50 border rounded-xl text-sm" placeholder="Opsi C (Teks)">
-                      <input type="url" id="adm-soal-img-c" class="w-full px-4 py-2 bg-indigo-50/30 border border-indigo-100 rounded-xl text-xs" placeholder="URL Gambar Opsi C (Opsional)">
+                   
+                   <!-- OPSI C -->
+                   <div class="space-y-1 bg-slate-50 p-3 rounded-2xl border">
+                      <input type="text" id="adm-soal-opsi-c" class="w-full px-3 py-2 bg-white border rounded-xl text-sm" placeholder="Opsi C (Teks)">
+                      <label class="block text-[9px] font-bold text-slate-400 uppercase pt-1">Gambar Opsi C (Opsional)</label>
+                      <input type="file" id="adm-soal-img-c-file" accept="image/*" class="w-full text-xs text-slate-500">
                    </div>
-                   <div class="space-y-1">
-                      <input type="text" id="adm-soal-opsi-d" class="w-full px-4 py-2.5 bg-slate-50 border rounded-xl text-sm" placeholder="Opsi D (Teks)">
-                      <input type="url" id="adm-soal-img-d" class="w-full px-4 py-2 bg-indigo-50/30 border border-indigo-100 rounded-xl text-xs" placeholder="URL Gambar Opsi D (Opsional)">
+                   
+                   <!-- OPSI D -->
+                   <div class="space-y-1 bg-slate-50 p-3 rounded-2xl border">
+                      <input type="text" id="adm-soal-opsi-d" class="w-full px-3 py-2 bg-white border rounded-xl text-sm" placeholder="Opsi D (Teks)">
+                      <label class="block text-[9px] font-bold text-slate-400 uppercase pt-1">Gambar Opsi D (Opsional)</label>
+                      <input type="file" id="adm-soal-img-d-file" accept="image/*" class="w-full text-xs text-slate-500">
                    </div>
-                   <div class="space-y-1 md:col-span-2">
-                      <input type="text" id="adm-soal-opsi-e" class="w-full px-4 py-2.5 bg-slate-50 border rounded-xl text-sm" placeholder="Opsi E (Teks)">
-                      <input type="url" id="adm-soal-img-e" class="w-full px-4 py-2 bg-indigo-50/30 border border-indigo-100 rounded-xl text-xs" placeholder="URL Gambar Opsi E (Opsional)">
+                   
+                   <!-- OPSI E -->
+                   <div class="space-y-1 bg-slate-50 p-3 rounded-2xl border md:col-span-2">
+                      <input type="text" id="adm-soal-opsi-e" class="w-full px-3 py-2 bg-white border rounded-xl text-sm" placeholder="Opsi E (Teks)">
+                      <label class="block text-[9px] font-bold text-slate-400 uppercase pt-1">Gambar Opsi E (Opsional)</label>
+                      <input type="file" id="adm-soal-img-e-file" accept="image/*" class="w-full text-xs text-slate-500">
                    </div>
                 </div>
              </div>
@@ -254,7 +270,7 @@
           </form>
        </div>
 
-       <!-- TAB 2: IMPORT SOAL MASSAL (NEW FITUR) -->
+       <!-- TAB 2: IMPORT SOAL MASSAL -->
        <div id="panel-admin-import" class="bg-white p-6 sm:p-8 rounded-3xl border border-slate-200 shadow-sm space-y-6 hidden">
           <div>
              <h3 class="text-base font-black text-slate-800">Import Soal Sekaligus (Massal)</h3>
@@ -276,7 +292,7 @@
     "opsi_d": "5", "img_d": "",
     "opsi_e": "6", "img_e": "",
     "jawaban": "A",
-    "pembahasan": "1 dikali atau ditambah 1 adalah 2"
+    "pembahasan": "1 ditambah 1 adalah 2"
   }
 ]
 </pre>
@@ -439,6 +455,21 @@
     window.uAktif = null;
     window.st = { jenis: "", soal: [], idx: 0, jwb: {} };
 
+    // FUNGSI UTILITAS: Mengubah File Lokal ke String Base64
+    const convertFileToBase64 = (fileInputId) => {
+      return new Promise((resolve) => {
+        const fileInput = document.getElementById(fileInputId);
+        if (fileInput && fileInput.files && fileInput.files[0]) {
+          const reader = new FileReader();
+          reader.onload = (e) => resolve(e.target.result);
+          reader.onerror = () => resolve("");
+          reader.readAsDataURL(fileInput.files[0]);
+        } else {
+          resolve("");
+        }
+      });
+    };
+
     // AUTH OBSERVER
     onAuthStateChanged(auth, async (user) => {
       if (user) {
@@ -468,7 +499,7 @@
       }
     });
 
-    // SISTEM REGISTER
+    // REGISTRASI
     window.lakukanPendaftaran = async function(e) {
       e.preventDefault();
       const nama = document.getElementById("reg-nama").value;
@@ -494,7 +525,7 @@
       }
     };
 
-    // SISTEM LOGIN
+    // LOGIN
     window.lakukanLogin = async function(e) {
       e.preventDefault();
       const email = document.getElementById("log-email").value;
@@ -529,32 +560,40 @@
       }
     };
 
-    // ADMIN SUBMIT SOAL TUNGGAL (LENGKAP DENGAN GAMBAR SOAL & OPSI)
+    // ADMIN SUBMIT SOAL TUNGGAL (DENGAN PROSES UPLOAD GAMBAR FILE LOKAL)
     window.adminSubmitSoal = async function(e) {
       e.preventDefault();
       try {
-        window.bukaModalDialog("Mengunggah...", "Menyimpan soal ke Firestore...");
-        
+        window.bukaModalDialog("Memproses...", "Mengonversi dan mengunggah gambar...");
+
+        // Konversi File Gambar Soal & Opsi ke Base64
+        const imgSoalBase64 = await convertFileToBase64("adm-soal-gambar-file");
+        const imgABase64 = await convertFileToBase64("adm-soal-img-a-file");
+        const imgBBase64 = await convertFileToBase64("adm-soal-img-b-file");
+        const imgCBase64 = await convertFileToBase64("adm-soal-img-c-file");
+        const imgDBase64 = await convertFileToBase64("adm-soal-img-d-file");
+        const imgEBase64 = await convertFileToBase64("adm-soal-img-e-file");
+
         const payload = {
           jenis: document.getElementById("adm-soal-jenis").value,
           paket: document.getElementById("adm-soal-paket").value,
           soal: document.getElementById("adm-soal-teks").value,
-          gambar_soal: document.getElementById("adm-soal-gambar").value || "",
+          gambar_soal: imgSoalBase64,
           
           opsi_a: document.getElementById("adm-soal-opsi-a").value,
-          img_a: document.getElementById("adm-soal-img-a").value || "",
+          img_a: imgABase64,
           
           opsi_b: document.getElementById("adm-soal-opsi-b").value,
-          img_b: document.getElementById("adm-soal-img-b").value || "",
+          img_b: imgBBase64,
           
           opsi_c: document.getElementById("adm-soal-opsi-c").value || "",
-          img_c: document.getElementById("adm-soal-img-c").value || "",
+          img_c: imgCBase64,
           
           opsi_d: document.getElementById("adm-soal-opsi-d").value || "",
-          img_d: document.getElementById("adm-soal-img-d").value || "",
+          img_d: imgDBase64,
           
           opsi_e: document.getElementById("adm-soal-opsi-e").value || "",
-          img_e: document.getElementById("adm-soal-img-e").value || "",
+          img_e: imgEBase64,
           
           jawaban: document.getElementById("adm-soal-rules").value.toUpperCase(),
           pembahasan: document.getElementById("adm-soal-pembahasan").value || "",
@@ -563,7 +602,7 @@
 
         await addDoc(collection(db, "soal"), payload);
         window.tutupModalDialog();
-        window.bukaModalDialog("Berhasil", "Soal berhasil disimpan!");
+        window.bukaModalDialog("Berhasil", "Soal beserta file gambar berhasil disimpan!");
         document.getElementById("form-admin-soal").reset();
       } catch(err) {
         window.tutupModalDialog();
@@ -571,7 +610,7 @@
       }
     };
 
-    // ADMIN IMPORT SOAL MASSAL (JSON)
+    // IMPORT SOAL MASSAL (JSON)
     window.adminImportMassal = async function(e) {
       e.preventDefault();
       const rawJson = document.getElementById("adm-import-json").value;
@@ -608,7 +647,7 @@
       }
     };
 
-    // ADMIN SUBMIT MATERI
+    // SUBMIT MATERI
     window.adminSubmitMateri = async function(e) {
       e.preventDefault();
       try {
@@ -626,7 +665,7 @@
       }
     };
 
-    // ADMIN SUBMIT INFORMASI
+    // SUBMIT INFORMASI
     window.adminSubmitInformasi = async function(e) {
       e.preventDefault();
       try {
@@ -644,7 +683,7 @@
       }
     };
 
-    // ADMIN KELOLA PESERTA
+    // KELOLA PESERTA
     window.adminLoadDaftarPeserta = async function() {
       const tbody = document.getElementById("adm-tabel-peserta-body");
       tbody.innerHTML = `<tr><td colspan="5" class="py-4 text-center">Memuat data...</td></tr>`;
@@ -678,19 +717,17 @@
       window.adminLoadDaftarPeserta();
     };
 
-    // LOGIKA PEMBACAAN SOAL UNTUK PESERTA (LATIHAN)
+    // MODE LATIHAN PESERTA
     window.mulaiLatihan = async function() {
       window.bukaModalDialog("Memuat...", "Membaca data soal dari Firebase...");
       
       try {
-        // Membaca koleksi soal
         const snap = await getDocs(collection(db, "soal"));
         window.tutupModalDialog();
 
         const list = [];
         snap.forEach(d => {
           const data = d.data();
-          // Mengambil soal yang bertipe 'latihan' atau semua soal jika tidak dibatasi
           if(!data.jenis || data.jenis === "latihan") {
             list.push({ id: d.id, ...data });
           }
@@ -715,7 +752,6 @@
       }
     };
 
-    // TAMPILKAN SOAL LATIHAN KE PESERTA (SUPPORT GAMBAR SOAL & GAMBAR OPSI)
     function tampilkanSoalLatihan() {
       const s = window.st.soal[window.st.idx];
       
@@ -735,7 +771,7 @@
 
       document.getElementById("latihan-blok-pembahasan").classList.add("hidden");
 
-      // Render Opsi Jawaban beserta Gambar Opsi jika ada
+      // Render Opsi Jawaban
       const bOpsi = document.getElementById("latihan-list-opsi");
       bOpsi.innerHTML = "";
 
@@ -795,7 +831,7 @@
       }
     };
 
-    // NAVIGASI PESERTA PENDUKUNG
+    // INFORMASI & MATERI
     window.bukaMenuInformasi = async function() {
       window.bukaModalDialog("Memuat...", "Mengambil informasi...");
       const snap = await getDocs(collection(db, "informasi"));
