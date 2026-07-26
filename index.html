@@ -426,9 +426,9 @@
           </div>
        </div>
 
-       <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 items-start">
-          <!-- KIRI/ATAS: CONTAINER UTAMA SOAL -->
-          <div class="lg:col-span-2 bg-white rounded-3xl border p-6 sm:p-8 space-y-6 shadow-sm">
+       <div id="container-grid-latihan" class="grid grid-cols-1 lg:grid-cols-3 gap-6 items-start">
+          <!-- CONTAINER UTAMA SOAL -->
+          <div id="container-soal-utama" class="lg:col-span-3 bg-white rounded-3xl border p-6 sm:p-8 space-y-6 shadow-sm">
              <div class="flex items-center justify-between border-b pb-4">
                 <span class="text-xs font-bold text-slate-400" id="latihan-no-soal">Soal Nomor -</span>
                 <span id="status-mode-tag" class="px-2.5 py-1 bg-emerald-50 text-emerald-700 rounded-lg text-[10px] font-black">Latihan Mandiri</span>
@@ -457,17 +457,17 @@
                 <button id="btn-latihan-prev" onclick="geserSoalSebelumnya()" class="py-3.5 px-5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-2xl font-black text-xs shadow-sm transition">
                    &larr; SOAL SEBELUMNYA
                 </button>
-                <button id="btn-cek-jawaban" onclick="cekJawabanLatihan()" class="flex-1 py-3.5 bg-indigo-600 text-white rounded-2xl font-black text-xs shadow-md">
+                <button id="btn-cek-jawaban" onclick="cekJawabanLatihan()" class="flex-1 py-3.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-2xl font-black text-xs shadow-md">
                    CEK JAWABAN
                 </button>
-                <button id="btn-latihan-lanjut" onclick="geserLatihanLanjut()" class="flex-1 py-3.5 bg-slate-900 text-white rounded-2xl font-black text-xs shadow-md">
+                <button id="btn-latihan-lanjut" onclick="geserLatihanLanjut()" class="flex-1 py-3.5 bg-slate-900 hover:bg-slate-800 text-white rounded-2xl font-black text-xs shadow-md">
                    SOAL BERIKUTNYA &rarr;
                 </button>
              </div>
           </div>
 
-          <!-- KANAN/BAWAH: PANEL NAVIGASI NOMOR SOAL (OPTIMAL HP & DESKTOP) -->
-          <div class="bg-white rounded-3xl border p-6 space-y-4 shadow-sm sticky top-20">
+          <!-- PANEL NAVIGASI NOMOR SOAL (Hanya Tampil Saat Paket Ujian) -->
+          <div id="panel-navigasi-soal-box" class="hidden bg-white rounded-3xl border p-6 space-y-4 shadow-sm sticky top-20">
              <div class="flex items-center justify-between border-b pb-3">
                 <h3 class="font-black text-xs text-slate-800 uppercase tracking-wider">Navigasi Soal</h3>
                 <span class="text-[10px] text-slate-400 font-bold" id="info-terjawab">0 Terjawab</span>
@@ -1110,7 +1110,7 @@
                  <div class="space-y-1">
                     <span class="px-2.5 py-1 bg-indigo-50 text-indigo-600 rounded-lg text-[10px] font-black uppercase">${mode === 'ujian' ? 'SIMULASI UJIAN' : 'LATIHAN MANDIRI'}</span>
                     <h3 class="font-black text-slate-800 text-base pt-1">${paketName}</h3>
-                    <p class="text-xs text-slate-400">Terdiri dari <b>${jumlahSoal}</b> butir soal (Bobot: 5/Soal).</p>
+                    <p class="text-xs text-slate-400">Terdiri dari <b>${jumlahSoal}</b> butir soal.</p>
                  </div>
                  <button onclick="window.mulaiMengerjakanPaket('${mode}', '${paketName}')" class="w-full py-3 bg-indigo-600 hover:bg-indigo-700 text-white font-black text-xs rounded-2xl shadow-md transition">
                     MULAI KERJAKAN &rarr;
@@ -1166,6 +1166,10 @@
         document.getElementById("box-selesai-nav").classList.remove("hidden");
         document.getElementById("btn-cek-jawaban").classList.add("hidden");
         
+        // Tampilkan Panel Navigasi khusus Paket Ujian
+        document.getElementById("panel-navigasi-soal-box").classList.remove("hidden");
+        document.getElementById("container-soal-utama").className = "lg:col-span-2 bg-white rounded-3xl border p-6 sm:p-8 space-y-6 shadow-sm";
+
         // TIMER HITUNG MAJU (STOPWATCH)
         if(window.st.timerInterval) clearInterval(window.st.timerInterval);
         document.getElementById("timer-count").innerText = "00:00";
@@ -1178,12 +1182,18 @@
         }, 1000);
 
       } else {
+        // MODE LATIHAN MANDIRI: Tanpa Navigasi Soal & Skor
         document.getElementById("mode-badge").innerText = "MODE LATIHAN MANDIRI";
         document.getElementById("status-mode-tag").innerText = "LATIHAN MANDIRI";
         document.getElementById("timer-box").classList.add("hidden");
         document.getElementById("btn-selesaikan-header").classList.add("hidden");
         document.getElementById("box-selesai-nav").classList.add("hidden");
         document.getElementById("btn-cek-jawaban").classList.remove("hidden");
+
+        // Sembunyikan Panel Navigasi & Buat Konten Soal Full Width
+        document.getElementById("panel-navigasi-soal-box").classList.add("hidden");
+        document.getElementById("container-soal-utama").className = "lg:col-span-3 bg-white rounded-3xl border p-6 sm:p-8 space-y-6 shadow-sm";
+
         if(window.st.timerInterval) clearInterval(window.st.timerInterval);
       }
 
@@ -1191,6 +1201,8 @@
     };
 
     function renderNavigasiNomor() {
+      if (window.st.jenis !== "ujian") return;
+
       const grid = document.getElementById("grid-navigasi-soal");
       grid.innerHTML = "";
 
@@ -1408,7 +1420,7 @@
       window.pindahHalamanInternal("hasil-ujian");
     };
 
-    // LIHAT PEMBAHASAN LENGKAP SEKALIGUS (SEPERTI YANG DIMINTA)
+    // LIHAT PEMBAHASAN LENGKAP SEKALIGUS
     window.mulaiLihatPembahasanUjian = function() {
       const container = document.getElementById("list-pembahasan-container");
       container.innerHTML = "";
