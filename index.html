@@ -283,16 +283,24 @@
              <button id="btn-submit-soal" type="submit" class="w-full py-3.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-2xl font-black text-xs shadow-md">SIMPAN SOAL KE FIREBASE</button>
           </form>
 
-          <!-- TABEL DAFTAR SOAL TERSEDIA (EDIT & HAPUS) -->
+          <!-- TABEL DAFTAR SOAL TERSEDIA (EDIT, CEKLIS & HAPUS BANYAK) -->
           <div class="pt-6 border-t border-slate-200 space-y-4">
-             <div class="flex items-center justify-between">
+             <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
                 <h4 class="font-black text-sm text-slate-800">Daftar Soal Tersimpan di Database</h4>
-                <button onclick="adminLoadDaftarSoal()" class="px-3 py-1 bg-indigo-50 text-indigo-600 font-bold text-xs rounded-lg">Refresh Daftar Soal</button>
+                <div class="flex items-center gap-2">
+                   <button onclick="window.adminHapusSoalTerpilih()" id="btn-hapus-terpilih" class="hidden px-3 py-1 bg-red-600 text-white font-bold text-xs rounded-lg hover:bg-red-700 shadow-sm transition">
+                      🗑️ Hapus Terpilih (<span id="jumlah-terceklis">0</span>)
+                   </button>
+                   <button onclick="adminLoadDaftarSoal()" class="px-3 py-1 bg-indigo-50 text-indigo-600 font-bold text-xs rounded-lg hover:bg-indigo-100 transition">🔄 Refresh Daftar Soal</button>
+                </div>
              </div>
              <div class="overflow-x-auto">
                 <table class="w-full text-left text-xs text-slate-600">
                    <thead>
                       <tr class="bg-slate-100 text-slate-500 uppercase text-[10px] font-black">
+                         <th class="py-3 px-3 text-center w-10">
+                            <input type="checkbox" id="chk-pilih-semua" onchange="window.togglePilihSemuaSoal(this)" class="w-4 h-4 rounded text-indigo-600 focus:ring-indigo-500 cursor-pointer">
+                         </th>
                          <th class="py-3 px-3">Jenis</th>
                          <th class="py-3 px-3">Paket</th>
                          <th class="py-3 px-3">Teks Pertanyaan Soal</th>
@@ -301,7 +309,7 @@
                       </tr>
                    </thead>
                    <tbody id="adm-tabel-soal-body" class="divide-y">
-                      <tr><td colspan="5" class="py-4 text-center text-slate-400">Klik refresh untuk menampilkan daftar soal...</td></tr>
+                      <tr><td colspan="6" class="py-4 text-center text-slate-400">Klik refresh untuk menampilkan daftar soal...</td></tr>
                    </tbody>
                 </table>
              </div>
@@ -310,9 +318,15 @@
 
        <!-- TAB 2: IMPORT SOAL EXCEL / CSV -->
        <div id="panel-admin-import" class="bg-white p-6 sm:p-8 rounded-3xl border border-slate-200 shadow-sm space-y-6 hidden">
-          <div>
-             <h3 class="text-base font-black text-slate-800">Import Soal Massal dari Excel / CSV</h3>
-             <p class="text-xs text-slate-500 mt-1">Unggah file Spreadsheet (.xlsx, .xls, .csv) dengan format kolom berikut pada baris pertama (Header):</p>
+          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+             <div>
+                <h3 class="text-base font-black text-slate-800">Import Soal Massal dari Excel / CSV</h3>
+                <p class="text-xs text-slate-500 mt-1">Unggah file Spreadsheet (.xlsx, .xls, .csv) dengan format kolom berikut pada baris pertama (Header):</p>
+             </div>
+             <!-- TOMBOL UNDUH FORMAT EXCEL -->
+             <button onclick="window.unduhFormatExcel()" type="button" class="px-4 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white font-black text-xs rounded-2xl flex items-center gap-2 shadow-md shrink-0 transition">
+                <span>📥</span> UNDUH FORMAT EXCEL
+             </button>
           </div>
 
           <div class="bg-indigo-50 border border-indigo-200 p-4 rounded-2xl text-xs text-indigo-900 space-y-2">
@@ -320,7 +334,7 @@
              <p class="font-mono text-[11px] bg-white p-2 rounded-lg border text-indigo-950 font-bold overflow-x-auto">
                 jenis | paket | soal | opsi_a | opsi_b | opsi_c | opsi_d | opsi_e | jawaban | pembahasan
              </p>
-             <p class="text-[10px] text-indigo-700">* Catatan: Isi kolom <b>jenis</b> dengan <code class="bg-indigo-100 px-1 rounded">latihan</code> atau <code class="bg-indigo-100 px-1 rounded">ujian</code>.</p>
+             <p class="text-[10px] text-indigo-700">* Catatan: Isi kolom <b>jenis</b> dengan <code class="bg-indigo-100 px-1 rounded font-bold">latihan</code> atau <code class="bg-indigo-100 px-1 rounded font-bold">ujian</code>. Kolom <b>jawaban</b> diisi huruf kunci (<code class="bg-indigo-100 px-1 rounded font-bold">A/B/C/D/E</code>).</p>
           </div>
 
           <form onsubmit="adminImportExcel(event)" class="space-y-4">
@@ -328,7 +342,7 @@
                 <label class="block text-[10px] font-black text-slate-400 uppercase mb-1">Pilih File Excel (.xlsx / .xls) atau CSV</label>
                 <input type="file" id="adm-import-excel-file" accept=".xlsx, .xls, .csv" required class="w-full px-4 py-3 bg-slate-50 border rounded-2xl text-xs text-slate-600 file:mr-4 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-black file:bg-indigo-600 file:text-white hover:file:bg-indigo-700">
              </div>
-             <button type="submit" class="w-full py-3.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-2xl font-black text-xs shadow-md">UNGGAH & IMPORT SOAL DARI FILE</button>
+             <button type="submit" class="w-full py-3.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-2xl font-black text-xs shadow-md">UNGGAH & IMPORT SOAL DARI FILE</button>
           </form>
        </div>
 
@@ -520,7 +534,7 @@
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
     import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
-    import { getFirestore, doc, setDoc, getDoc, collection, addDoc, getDocs, updateDoc, deleteDoc, query, where } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+    import { getFirestore, doc, setDoc, getDoc, collection, addDoc, getDocs, updateDoc, deleteDoc, query, where, writeBatch } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
     const firebaseConfig = {
       apiKey: "AIzaSyBeIATeGNfjKFEAlPOTfQD9Lq3SgwmFvGA",
@@ -727,10 +741,15 @@
       }
     };
 
-    // LOAD DAFTAR SOAL UNTUK ADMIN EDIT / HAPUS
+    // LOAD DAFTAR SOAL UNTUK ADMIN EDIT / HAPUS / BULK DELETE
     window.adminLoadDaftarSoal = async function() {
       const tbody = document.getElementById("adm-tabel-soal-body");
-      tbody.innerHTML = `<tr><td colspan="5" class="py-4 text-center">Memuat daftar soal...</td></tr>`;
+      tbody.innerHTML = `<tr><td colspan="6" class="py-4 text-center">Memuat daftar soal...</td></tr>`;
+
+      // Reset checkbox header & tombol hapus terpilih
+      const chkHeader = document.getElementById("chk-pilih-semua");
+      if(chkHeader) chkHeader.checked = false;
+      window.updateTombolHapusTerpilih();
 
       try {
         const snap = await getDocs(collection(db, "soal"));
@@ -738,7 +757,7 @@
         window.semuaSoalCache = [];
 
         if(snap.empty) {
-          tbody.innerHTML = `<tr><td colspan="5" class="py-4 text-center text-slate-400">Belum ada soal di database.</td></tr>`;
+          tbody.innerHTML = `<tr><td colspan="6" class="py-4 text-center text-slate-400">Belum ada soal di database.</td></tr>`;
           return;
         }
 
@@ -748,18 +767,72 @@
 
           tbody.innerHTML += `
             <tr class="hover:bg-slate-50 border-b">
+              <td class="py-3 px-3 text-center">
+                 <input type="checkbox" value="${item.id}" onchange="window.updateTombolHapusTerpilih()" class="chk-soal-item w-4 h-4 rounded text-indigo-600 focus:ring-indigo-500 cursor-pointer">
+              </td>
               <td class="py-3 px-3 uppercase text-[10px] font-black">${item.jenis || 'latihan'}</td>
               <td class="py-3 px-3 font-bold text-indigo-900">${item.paket || 'TANPA PAKET'}</td>
               <td class="py-3 px-3 truncate max-w-xs">${item.soal}</td>
               <td class="py-3 px-3 font-black text-emerald-600">${item.jawaban}</td>
               <td class="py-3 px-3 text-center space-x-2">
-                 <button onclick="window.persiapkanEditSoal('${item.id}')" class="px-2.5 py-1 bg-amber-500 text-white rounded-lg text-[10px] font-bold">Edit</button>
-                 <button onclick="window.hapusSoal('${item.id}')" class="px-2.5 py-1 bg-red-600 text-white rounded-lg text-[10px] font-bold">Hapus</button>
+                 <button onclick="window.persiapkanEditSoal('${item.id}')" class="px-2.5 py-1 bg-amber-500 text-white rounded-lg text-[10px] font-bold hover:bg-amber-600 transition">Edit</button>
+                 <button onclick="window.hapusSoal('${item.id}')" class="px-2.5 py-1 bg-red-600 text-white rounded-lg text-[10px] font-bold hover:bg-red-700 transition">Hapus</button>
               </td>
             </tr>`;
         });
       } catch(e) {
-        tbody.innerHTML = `<tr><td colspan="5" class="py-4 text-center text-red-500">${e.message}</td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="6" class="py-4 text-center text-red-500">${e.message}</td></tr>`;
+      }
+    };
+
+    // FITUR CEKLIS SEMUA SOAL
+    window.togglePilihSemuaSoal = function(source) {
+      const checkboxes = document.querySelectorAll('.chk-soal-item');
+      checkboxes.forEach(cb => cb.checked = source.checked);
+      window.updateTombolHapusTerpilih();
+    };
+
+    // HITUNG CEKLIS & TAMPILKAN TOMBOL HAPUS TERPILIH
+    window.updateTombolHapusTerpilih = function() {
+      const checkedBoxes = document.querySelectorAll('.chk-soal-item:checked');
+      const btnHapus = document.getElementById('btn-hapus-terpilih');
+      const jmlSpan = document.getElementById('jumlah-terceklis');
+
+      if (checkedBoxes.length > 0) {
+        if(btnHapus) btnHapus.classList.remove('hidden');
+        if(jmlSpan) jmlSpan.innerText = checkedBoxes.length;
+      } else {
+        if(btnHapus) btnHapus.classList.add('hidden');
+        if(jmlSpan) jmlSpan.innerText = '0';
+      }
+    };
+
+    // HAPUS BANYAK SOAL TERPILIH (BULK DELETE)
+    window.adminHapusSoalTerpilih = async function() {
+      const checkedBoxes = document.querySelectorAll('.chk-soal-item:checked');
+      const total = checkedBoxes.length;
+
+      if (total === 0) return;
+
+      if (confirm(`Apakah Anda yakin ingin menghapus ${total} soal yang dipilih secara permanen?`)) {
+        try {
+          window.bukaModalDialog("Memproses...", `Menghapus ${total} soal dari database...`);
+          
+          const batch = writeBatch(db);
+          checkedBoxes.forEach(cb => {
+            const idDoc = cb.value;
+            batch.delete(doc(db, "soal", idDoc));
+          });
+
+          await batch.commit();
+
+          window.tutupModalDialog();
+          window.bukaModalDialog("Berhasil", `Berhasil menghapus ${total} soal!`);
+          window.adminLoadDaftarSoal();
+        } catch(e) {
+          window.tutupModalDialog();
+          window.bukaModalDialog("Gagal Hapus", e.message);
+        }
       }
     };
 
@@ -827,7 +900,42 @@
       }
     };
 
-    // IMPORT SOAL MASSAL EXCEL/CSV
+    // UNDUH FORMAT EXCEL TEMPLATE
+    window.unduhFormatExcel = function() {
+      const sampleData = [
+        {
+          jenis: "latihan",
+          paket: "PAKET 1 - PEDAGOGIK",
+          soal: "Apa yang dimaksud dengan diferensiasi pembelajaran?",
+          opsi_a: "Penyesuaian materi dengan kebutuhan peserta didik",
+          opsi_b: "Metode ujian tanpa waktu",
+          opsi_c: "Pengelompokan kelas berdasar usia",
+          opsi_d: "Pemberian nilai secara acak",
+          opsi_e: "Sistem penilaian terpusat",
+          jawaban: "A",
+          pembahasan: "Diferensiasi pembelajaran menyesuaikan materi, proses, dan produk belajar dengan kebutuhan peserta didik."
+        },
+        {
+          jenis: "ujian",
+          paket: "SIMULASI CAT PAKET A",
+          soal: "Berapakah hasil dari 15 x 12?",
+          opsi_a: "150",
+          opsi_b: "170",
+          opsi_c: "180",
+          opsi_d: "190",
+          opsi_e: "200",
+          jawaban: "C",
+          pembahasan: "15 x 12 = 180."
+        }
+      ];
+
+      const worksheet = XLSX.utils.json_to_sheet(sampleData);
+      const workbook = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(workbook, worksheet, "Template Soal");
+      XLSX.writeFile(workbook, "Template_Import_Soal_CBT.xlsx");
+    };
+
+    // IMPORT SOAL MASSAL EXCEL/CSV (TELAH DIPERBAIKI SENSITIVITAS KOLOM & NILAI DINAMIS)
     window.adminImportExcel = function(e) {
       e.preventDefault();
       const fileInput = document.getElementById("adm-import-excel-file");
@@ -843,7 +951,7 @@
           const workbook = XLSX.read(data, { type: 'array' });
           const firstSheetName = workbook.SheetNames[0];
           const worksheet = workbook.Sheets[firstSheetName];
-          const jsonData = XLSX.utils.sheet_to_json(worksheet);
+          const jsonData = XLSX.utils.sheet_to_json(worksheet, { defval: "" });
 
           if (jsonData.length === 0) {
             throw new Error("File kosong atau format header tidak sesuai.");
@@ -851,19 +959,57 @@
 
           window.bukaModalDialog("Mengunggah...", `Mengunggah ${jsonData.length} soal ke database Firebase...`);
 
+          // Helper pencarian nilai key insensitive
+          const getValue = (obj, keys, defaultVal = "") => {
+            const objKeys = Object.keys(obj);
+            for (const key of keys) {
+              const foundKey = objKeys.find(k => k.trim().toLowerCase() === key.toLowerCase());
+              if (foundKey && obj[foundKey] !== undefined && obj[foundKey] !== null && obj[foundKey] !== "") {
+                return obj[foundKey].toString().trim();
+              }
+            }
+            return defaultVal;
+          };
+
           for (const item of jsonData) {
+            // Ambil jenis & validasi
+            let valJenis = getValue(item, ["jenis", "kategori", "type"], "latihan").toLowerCase();
+            if (valJenis !== "ujian") valJenis = "latihan";
+
+            // Ambil nama paket
+            const valPaket = getValue(item, ["paket", "nama_paket", "nama paket", "package"], "PAKET IMPORT").toUpperCase();
+
+            // Ambil teks soal
+            const valSoal = getValue(item, ["soal", "pertanyaan", "question", "teks"]);
+
+            // Ambil Opsi
+            const valOpsiA = getValue(item, ["opsi_a", "opsia", "a", "pilihan_a"]);
+            const valOpsiB = getValue(item, ["opsi_b", "opsib", "b", "pilihan_b"]);
+            const valOpsiC = getValue(item, ["opsi_c", "opsic", "c", "pilihan_c"]);
+            const valOpsiD = getValue(item, ["opsi_d", "opsid", "d", "pilihan_d"]);
+            const valOpsiE = getValue(item, ["opsi_e", "opsie", "e", "pilihan_e"]);
+
+            // Ambil Kunci Jawaban
+            let valJawaban = getValue(item, ["jawaban", "kunci", "kunci_jawaban", "key", "rules"], "A").toUpperCase();
+            if (!["A", "B", "C", "D", "E"].includes(valJawaban)) {
+              valJawaban = "A"; // default fallback jika format salah
+            }
+
+            // Ambil Pembahasan
+            const valPembahasan = getValue(item, ["pembahasan", "discussion", "keterangan"]);
+
             await addDoc(collection(db, "soal"), {
-              jenis: (item.jenis || "latihan").toString().toLowerCase().trim(),
-              paket: (item.paket || "PAKET IMPORT").toString().trim().toUpperCase(),
-              soal: (item.soal || "").toString(),
+              jenis: valJenis,
+              paket: valPaket,
+              soal: valSoal,
               gambar_soal: "",
-              opsi_a: (item.opsi_a || "").toString(), img_a: "",
-              opsi_b: (item.opsi_b || "").toString(), img_b: "",
-              opsi_c: (item.opsi_c || "").toString(), img_c: "",
-              opsi_d: (item.opsi_d || "").toString(), img_d: "",
-              opsi_e: (item.opsi_e || "").toString(), img_e: "",
-              jawaban: (item.jawaban || "A").toString().toUpperCase().trim(),
-              pembahasan: (item.pembahasan || "").toString(),
+              opsi_a: valOpsiA, img_a: "",
+              opsi_b: valOpsiB, img_b: "",
+              opsi_c: valOpsiC, img_c: "",
+              opsi_d: valOpsiD, img_d: "",
+              opsi_e: valOpsiE, img_e: "",
+              jawaban: valJawaban,
+              pembahasan: valPembahasan,
               createdAt: new Date().toISOString()
             });
           }
