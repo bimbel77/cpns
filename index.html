@@ -74,9 +74,12 @@
     <!-- PANEL AUTH -->
     <div id="auth-panel" class="max-w-md mx-auto my-8 sm:my-12 bg-white p-6 sm:p-8 rounded-3xl border border-slate-200 shadow-xl space-y-6">
        <div class="flex flex-col items-center text-center space-y-3 pt-2">
-          <!-- LOGO BARU DARI GITHUB -->
-          <img src="logo.png" alt="Logo Portal" class="w-16 h-16 object-contain drop-shadow-md">
-          
+          <div class="w-16 h-16 bg-gradient-to-tr from-indigo-600 to-indigo-800 rounded-2xl flex items-center justify-center text-white shadow-lg shadow-indigo-500/20">
+             <svg xmlns="http://www.w3.org/2000/svg" class="h-9 w-9" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 14l9-5-9-5-9 5 9 5z" />
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 14l6.16-3.422a12.083 12.083 0 01.665 6.479A11.952 11.952 0 0012 20.055a11.952 11.952 0 00-6.824-2.998 12.078 12.078 0 01.665-6.479L12 14z" />
+             </svg>
+          </div>
           <div>
              <h2 class="text-3xl font-black text-indigo-950 tracking-tight">CAT</h2>
              <p class="text-xs font-black text-indigo-600 tracking-wider uppercase leading-none mt-1">PORTAL PESERTA & ADMIN</p>
@@ -1827,3 +1830,153 @@
         document.getElementById("timer-box").classList.remove("hidden");
         document.getElementById("btn-selesaikan-header").classList.remove("hidden");
         document.getElementById("box-selesai-nav").classList.remove("hidden");
+        document.getElementById("btn-cek-jawaban").classList.add("hidden");
+        
+        document.getElementById("panel-navigasi-soal-box").classList.remove("hidden");
+        document.getElementById("container-soal-utama").className = "lg:col-span-2 bg-white rounded-3xl border p-6 sm:p-8 space-y-6 shadow-sm";
+
+        if(window.st.timerInterval) clearInterval(window.st.timerInterval);
+        document.getElementById("timer-count").innerText = "00:00";
+        
+        window.st.timerInterval = setInterval(() => {
+          window.st.detikBerjalan++;
+          const m = Math.floor(window.st.detikBerjalan / 60);
+          const s = window.st.detikBerjalan % 60;
+          document.getElementById("timer-count").innerText = `${m < 10 ? '0'+m : m}:${s < 10 ? '0'+s : s}`;
+        }, 1000);
+
+      } else {
+        document.getElementById("mode-badge").innerText = "MODE LATIHAN MANDIRI";
+        document.getElementById("status-mode-tag").innerText = "LATIHAN MANDIRI";
+        document.getElementById("timer-box").classList.add("hidden");
+        document.getElementById("btn-selesaikan-header").classList.add("hidden");
+        document.getElementById("box-selesai-nav").classList.add("hidden");
+        document.getElementById("btn-cek-jawaban").classList.remove("hidden");
+
+        document.getElementById("panel-navigasi-soal-box").classList.add("hidden");
+        document.getElementById("container-soal-utama").className = "lg:col-span-3 bg-white rounded-3xl border p-6 sm:p-8 space-y-6 shadow-sm";
+
+        if(window.st.timerInterval) clearInterval(window.st.timerInterval);
+      }
+
+      tampilkanSoalLatihan();
+    };
+
+    function renderNavigasiNomor() {
+      if (window.st.jenis !== "ujian") return;
+
+      const grid = document.getElementById("grid-navigasi-soal");
+      grid.innerHTML = "";
+
+      let jumlahTerjawab = 0;
+
+      window.st.soal.forEach((s, idx) => {
+        const isSelected = window.st.jwb[idx] !== undefined;
+        if (isSelected) jumlahTerjawab++;
+
+        const isCurrent = idx === window.st.idx;
+        
+        let btnClass = "w-full aspect-square rounded-xl flex items-center justify-center font-black text-xs transition border cursor-pointer ";
+
+        if (isCurrent) {
+          btnClass += "bg-indigo-600 text-white border-indigo-700 ring-2 ring-indigo-400 ";
+        } else if (isSelected) {
+          btnClass += "bg-indigo-100 text-indigo-700 border-indigo-300 font-bold ";
+        } else {
+          btnClass += "bg-slate-50 text-slate-600 border-slate-200 hover:bg-slate-100 ";
+        }
+
+        grid.innerHTML += `
+          <button onclick="pindahKeNomor(${idx})" class="${btnClass}">
+             ${idx + 1}
+          </button>`;
+      });
+
+      document.getElementById("info-terjawab").innerText = `${jumlahTerjawab}/${window.st.soal.length} Terjawab`;
+    }
+
+    window.pindahKeNomor = function(targetIdx) {
+      window.st.idx = targetIdx;
+      tampilkanSoalLatihan();
+    };
+
+    function tampilkanSoalLatihan() {
+      const s = window.st.soal[window.st.idx];
+      
+      document.getElementById("latihan-info-judul").innerText = `${s.paket || 'Latihan'} (${window.st.idx + 1}/${window.st.soal.length})`;
+      document.getElementById("latihan-no-soal").innerText = `Soal Nomor ${window.st.idx + 1}`;
+      document.getElementById("latihan-teks-soal").innerText = s.soal;
+
+      const btnPrev = document.getElementById("btn-latihan-prev");
+      if(window.st.idx === 0) {
+        btnPrev.classList.add("opacity-40", "pointer-events-none");
+      } else {
+        btnPrev.classList.remove("opacity-40", "pointer-events-none");
+      }
+
+      const imgContainer = document.getElementById("latihan-gambar-container");
+      const imgSoal = document.getElementById("latihan-gambar-soal");
+      if (s.gambar_soal && s.gambar_soal.trim() !== "") {
+        imgSoal.src = s.gambar_soal;
+        imgContainer.classList.remove("hidden");
+      } else {
+        imgContainer.classList.add("hidden");
+      }
+
+      document.getElementById("latihan-blok-pembahasan").classList.add("hidden");
+
+      const bOpsi = document.getElementById("latihan-list-opsi");
+      bOpsi.innerHTML = "";
+
+      const jwbDipilih = window.st.jwb[window.st.idx];
+
+      ["a", "b", "c", "d", "e"].forEach(k => {
+        const keyText = "opsi_" + k;
+        const keyImg = "img_" + k;
+        const huruf = k.toUpperCase();
+
+        if (s[keyText] && s[keyText].trim() !== "") {
+          const gambarOpsiHtml = (s[keyImg] && s[keyImg].trim() !== "") 
+            ? `<img src="${s[keyImg]}" class="mt-2 max-h-40 rounded-lg object-contain border" alt="Opsi ${huruf}">` 
+            : "";
+
+          const isSelected = jwbDipilih === huruf;
+          let classStyle = "w-full text-left p-4 bg-slate-50 border border-slate-200 rounded-2xl hover:bg-slate-100 transition cursor-pointer";
+
+          if (isSelected) {
+            classStyle = "w-full text-left p-4 bg-indigo-50 border-2 border-indigo-600 rounded-2xl transition cursor-pointer";
+          }
+
+          bOpsi.innerHTML += `
+            <button onclick="pilihOpsiLatihan('${huruf}')" id="btn-opsi-${huruf}" class="${classStyle}">
+               <div class="flex items-start gap-3">
+                  <span class="w-7 h-7 rounded-lg bg-indigo-100 text-indigo-700 flex items-center justify-center text-xs font-black shrink-0" id="badge-opsi-${huruf}">${huruf}</span>
+                  <div class="flex-1">
+                     <p class="text-sm text-slate-800">${s[keyText]}</p>
+                     ${gambarOpsiHtml}
+                  </div>
+               </div>
+            </button>`;
+        }
+      });
+
+      renderNavigasiNomor();
+    }
+
+    window.pilihOpsiLatihan = function(opsi) {
+      window.st.jwb[window.st.idx] = opsi;
+      ["A", "B", "C", "D", "E"].forEach(h => {
+        const el = document.getElementById(`btn-opsi-${h}`);
+        if (el) {
+          if (h === opsi) {
+            el.className = "w-full text-left p-4 bg-indigo-50 border-2 border-indigo-600 rounded-2xl transition cursor-pointer";
+          } else {
+            el.className = "w-full text-left p-4 bg-slate-50 border border-slate-200 rounded-2xl hover:bg-slate-100 transition cursor-pointer";
+          }
+        }
+      });
+      renderNavigasiNomor();
+    };
+  </script>
+</body>
+</html>
