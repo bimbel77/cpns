@@ -1058,7 +1058,7 @@
       }
     };
 
-    // KELOLA PESERTA (NAMA, EMAIL, NO HP & FILTER PENCARIAN)
+    // KELOLA PESERTA
     window.adminLoadDaftarPeserta = async function() {
       const tbody = document.getElementById("adm-tabel-peserta-body");
       tbody.innerHTML = `<tr><td colspan="5" class="py-4 text-center">Memuat data peserta...</td></tr>`;
@@ -1111,7 +1111,6 @@
       });
     };
 
-    // SEARCH REALTIME PESERTA BERDASARKAN EMAIL, NAMA, DAN NO HP
     window.cariPesertaLocal = function() {
       const q = document.getElementById("cari-peserta-input").value.toLowerCase().trim();
       const filtered = window.semuaPesertaCache.filter(p => {
@@ -1150,7 +1149,6 @@
       }
     };
 
-    // SUBMIT MATERI PRO DENGAN ISI EDITABLE HTML EDITOR
     window.adminSubmitMateri = async function(e) {
       e.preventDefault();
       const judul = document.getElementById("adm-materi-judul").value;
@@ -1178,7 +1176,6 @@
       }
     };
 
-    // SUBMIT INFORMASI
     window.adminSubmitInformasi = async function(e) {
       e.preventDefault();
       const judul = document.getElementById("adm-info-judul").value;
@@ -1201,7 +1198,6 @@
       }
     };
 
-    // BUKA MENU INFORMASI PESERTA
     window.bukaMenuInformasi = async function() {
       window.bukaModalDialog("Memuat...", "Membaca pengumuman...");
       try {
@@ -1234,7 +1230,6 @@
       }
     };
 
-    // BUKA MENU MATERI PESERTA PRO
     window.bukaMenuMateri = async function() {
       const isUserPro = window.uAktif && window.uAktif.tipe === "pro";
       if (!isUserPro) {
@@ -1286,7 +1281,6 @@
       }
     };
 
-    // ADMIN SUBMIT SOAL TUNGGAL (TAMBAH / EDIT)
     window.adminSubmitSoal = async function(e) {
       e.preventDefault();
       try {
@@ -1354,7 +1348,6 @@
       }
     };
 
-    // LOAD DAFTAR SOAL UNTUK ADMIN EDIT / HAPUS / BULK DELETE
     window.adminLoadDaftarSoal = async function() {
       const tbody = document.getElementById("adm-tabel-soal-body");
       tbody.innerHTML = `<tr><td colspan="7" class="py-4 text-center">Memuat database soal...</td></tr>`;
@@ -1830,153 +1823,319 @@
         document.getElementById("timer-box").classList.remove("hidden");
         document.getElementById("btn-selesaikan-header").classList.remove("hidden");
         document.getElementById("box-selesai-nav").classList.remove("hidden");
-        document.getElementById("btn-cek-jawaban").classList.add("hidden");
-        
         document.getElementById("panel-navigasi-soal-box").classList.remove("hidden");
+        document.getElementById("btn-cek-jawaban").classList.add("hidden");
         document.getElementById("container-soal-utama").className = "lg:col-span-2 bg-white rounded-3xl border p-6 sm:p-8 space-y-6 shadow-sm";
 
         if(window.st.timerInterval) clearInterval(window.st.timerInterval);
-        document.getElementById("timer-count").innerText = "00:00";
-        
         window.st.timerInterval = setInterval(() => {
           window.st.detikBerjalan++;
-          const m = Math.floor(window.st.detikBerjalan / 60);
-          const s = window.st.detikBerjalan % 60;
-          document.getElementById("timer-count").innerText = `${m < 10 ? '0'+m : m}:${s < 10 ? '0'+s : s}`;
+          const m = String(Math.floor(window.st.detikBerjalan / 60)).padStart(2, '0');
+          const s = String(window.st.detikBerjalan % 60).padStart(2, '0');
+          document.getElementById("timer-count").innerText = `${m}:${s}`;
         }, 1000);
-
       } else {
         document.getElementById("mode-badge").innerText = "MODE LATIHAN MANDIRI";
         document.getElementById("status-mode-tag").innerText = "LATIHAN MANDIRI";
         document.getElementById("timer-box").classList.add("hidden");
         document.getElementById("btn-selesaikan-header").classList.add("hidden");
         document.getElementById("box-selesai-nav").classList.add("hidden");
-        document.getElementById("btn-cek-jawaban").classList.remove("hidden");
-
         document.getElementById("panel-navigasi-soal-box").classList.add("hidden");
+        document.getElementById("btn-cek-jawaban").classList.remove("hidden");
         document.getElementById("container-soal-utama").className = "lg:col-span-3 bg-white rounded-3xl border p-6 sm:p-8 space-y-6 shadow-sm";
-
-        if(window.st.timerInterval) clearInterval(window.st.timerInterval);
       }
 
-      tampilkanSoalLatihan();
+      window.tampilSoal(0);
+      if(mode === "ujian") window.renderNavigasiSoal();
     };
 
-    function renderNavigasiNomor() {
-      if (window.st.jenis !== "ujian") return;
+    // ==========================================
+    // FUNGSI NAVIGASI & PENGERJAAN SOAL (PESERTA)
+    // ==========================================
 
-      const grid = document.getElementById("grid-navigasi-soal");
-      grid.innerHTML = "";
+    window.tampilSoal = function(idx) {
+      if (!window.st.soal || window.st.soal.length === 0) return;
+      window.st.idx = idx;
+      const q = window.st.soal[idx];
 
-      let jumlahTerjawab = 0;
+      // Sembunyikan blok pembahasan setiap kali pindah soal
+      document.getElementById("latihan-blok-pembahasan").classList.add("hidden");
 
-      window.st.soal.forEach((s, idx) => {
-        const isSelected = window.st.jwb[idx] !== undefined;
-        if (isSelected) jumlahTerjawab++;
+      // No Soal & Info Header
+      document.getElementById("latihan-no-soal").innerText = `Soal Nomor ${idx + 1} dari ${window.st.soal.length}`;
+      document.getElementById("latihan-info-judul").innerText = q.paket || "Soal";
 
-        const isCurrent = idx === window.st.idx;
-        
-        let btnClass = "w-full aspect-square rounded-xl flex items-center justify-center font-black text-xs transition border cursor-pointer ";
-
-        if (isCurrent) {
-          btnClass += "bg-indigo-600 text-white border-indigo-700 ring-2 ring-indigo-400 ";
-        } else if (isSelected) {
-          btnClass += "bg-indigo-100 text-indigo-700 border-indigo-300 font-bold ";
-        } else {
-          btnClass += "bg-slate-50 text-slate-600 border-slate-200 hover:bg-slate-100 ";
-        }
-
-        grid.innerHTML += `
-          <button onclick="pindahKeNomor(${idx})" class="${btnClass}">
-             ${idx + 1}
-          </button>`;
-      });
-
-      document.getElementById("info-terjawab").innerText = `${jumlahTerjawab}/${window.st.soal.length} Terjawab`;
-    }
-
-    window.pindahKeNomor = function(targetIdx) {
-      window.st.idx = targetIdx;
-      tampilkanSoalLatihan();
-    };
-
-    function tampilkanSoalLatihan() {
-      const s = window.st.soal[window.st.idx];
-      
-      document.getElementById("latihan-info-judul").innerText = `${s.paket || 'Latihan'} (${window.st.idx + 1}/${window.st.soal.length})`;
-      document.getElementById("latihan-no-soal").innerText = `Soal Nomor ${window.st.idx + 1}`;
-      document.getElementById("latihan-teks-soal").innerText = s.soal;
-
-      const btnPrev = document.getElementById("btn-latihan-prev");
-      if(window.st.idx === 0) {
-        btnPrev.classList.add("opacity-40", "pointer-events-none");
-      } else {
-        btnPrev.classList.remove("opacity-40", "pointer-events-none");
-      }
-
+      // Gambar Soal
       const imgContainer = document.getElementById("latihan-gambar-container");
-      const imgSoal = document.getElementById("latihan-gambar-soal");
-      if (s.gambar_soal && s.gambar_soal.trim() !== "") {
-        imgSoal.src = s.gambar_soal;
+      const imgEl = document.getElementById("latihan-gambar-soal");
+      if (q.gambar_soal) {
+        imgEl.src = q.gambar_soal;
         imgContainer.classList.remove("hidden");
       } else {
         imgContainer.classList.add("hidden");
       }
 
-      document.getElementById("latihan-blok-pembahasan").classList.add("hidden");
+      // Teks Pertanyaan Soal
+      document.getElementById("latihan-teks-soal").innerText = q.soal || "";
 
-      const bOpsi = document.getElementById("latihan-list-opsi");
-      bOpsi.innerHTML = "";
+      // List Opsi Jawaban
+      const opsiList = [
+        { key: "A", text: q.opsi_a, img: q.img_a },
+        { key: "B", text: q.opsi_b, img: q.img_b },
+        { key: "C", text: q.opsi_c, img: q.img_c },
+        { key: "D", text: q.opsi_d, img: q.img_d },
+        { key: "E", text: q.opsi_e, img: q.img_e }
+      ].filter(o => o.text || o.img);
 
-      const jwbDipilih = window.st.jwb[window.st.idx];
+      const userAns = window.st.jwb[idx];
+      const opsiContainer = document.getElementById("latihan-list-opsi");
+      opsiContainer.innerHTML = "";
 
-      ["a", "b", "c", "d", "e"].forEach(k => {
-        const keyText = "opsi_" + k;
-        const keyImg = "img_" + k;
-        const huruf = k.toUpperCase();
+      opsiList.forEach(o => {
+        const isSelected = userAns === o.key;
+        const btnClass = isSelected
+          ? "w-full p-4 text-left border-2 border-indigo-600 bg-indigo-50/50 rounded-2xl flex items-start gap-3 transition shadow-sm"
+          : "w-full p-4 text-left border border-slate-200 hover:border-slate-300 hover:bg-slate-50/50 rounded-2xl flex items-start gap-3 transition";
 
-        if (s[keyText] && s[keyText].trim() !== "") {
-          const gambarOpsiHtml = (s[keyImg] && s[keyImg].trim() !== "") 
-            ? `<img src="${s[keyImg]}" class="mt-2 max-h-40 rounded-lg object-contain border" alt="Opsi ${huruf}">` 
-            : "";
+        const badgeClass = isSelected
+          ? "w-7 h-7 rounded-xl bg-indigo-600 text-white flex items-center justify-center font-bold text-xs shrink-0"
+          : "w-7 h-7 rounded-xl bg-slate-100 text-slate-600 flex items-center justify-center font-bold text-xs shrink-0";
 
-          const isSelected = jwbDipilih === huruf;
-          let classStyle = "w-full text-left p-4 bg-slate-50 border border-slate-200 rounded-2xl hover:bg-slate-100 transition cursor-pointer";
+        let imgHtml = o.img ? `<img src="${o.img}" class="max-h-40 rounded-lg mt-2 border" />` : "";
 
-          if (isSelected) {
-            classStyle = "w-full text-left p-4 bg-indigo-50 border-2 border-indigo-600 rounded-2xl transition cursor-pointer";
-          }
-
-          bOpsi.innerHTML += `
-            <button onclick="pilihOpsiLatihan('${huruf}')" id="btn-opsi-${huruf}" class="${classStyle}">
-               <div class="flex items-start gap-3">
-                  <span class="w-7 h-7 rounded-lg bg-indigo-100 text-indigo-700 flex items-center justify-center text-xs font-black shrink-0" id="badge-opsi-${huruf}">${huruf}</span>
-                  <div class="flex-1">
-                     <p class="text-sm text-slate-800">${s[keyText]}</p>
-                     ${gambarOpsiHtml}
-                  </div>
-               </div>
-            </button>`;
-        }
+        opsiContainer.innerHTML += `
+          <button onclick="window.pilihJawaban('${o.key}')" class="${btnClass}">
+            <span class="${badgeClass}">${o.key}</span>
+            <div class="flex-1 pt-1 text-xs sm:text-sm font-medium text-slate-700">
+              <div>${o.text || ""}</div>
+              ${imgHtml}
+            </div>
+          </button>
+        `;
       });
 
-      renderNavigasiNomor();
-    }
+      // Status Tombol Sebelumnya
+      const btnPrev = document.getElementById("btn-latihan-prev");
+      if (idx === 0) {
+        btnPrev.disabled = true;
+        btnPrev.classList.add("opacity-50", "cursor-not-allowed");
+      } else {
+        btnPrev.disabled = false;
+        btnPrev.classList.remove("opacity-50", "cursor-not-allowed");
+      }
 
-    window.pilihOpsiLatihan = function(opsi) {
-      window.st.jwb[window.st.idx] = opsi;
-      ["A", "B", "C", "D", "E"].forEach(h => {
-        const el = document.getElementById(`btn-opsi-${h}`);
-        if (el) {
-          if (h === opsi) {
-            el.className = "w-full text-left p-4 bg-indigo-50 border-2 border-indigo-600 rounded-2xl transition cursor-pointer";
-          } else {
-            el.className = "w-full text-left p-4 bg-slate-50 border border-slate-200 rounded-2xl hover:bg-slate-100 transition cursor-pointer";
-          }
-        }
-      });
-      renderNavigasiNomor();
+      // Refresh Navigasi jika mode ujian
+      if (window.st.jenis === "ujian") {
+        window.renderNavigasiSoal();
+      }
     };
+
+    window.pilihJawaban = function(opsiKey) {
+      window.st.jwb[window.st.idx] = opsiKey;
+      window.tampilSoal(window.st.idx);
+    };
+
+    // FUNGSI TOMBOL "CEK JAWABAN" (LATIHAN MANDIRI)
+    window.cekJawabanLatihan = function() {
+      const idx = window.st.idx;
+      const q = window.st.soal[idx];
+      const userAns = window.st.jwb[idx];
+
+      if (!userAns) {
+        window.bukaModalDialog("Perhatian", "Silakan pilih salah satu jawaban terlebih dahulu!");
+        return;
+      }
+
+      const isCorrect = userAns === q.jawaban;
+      const blokPembahasan = document.getElementById("latihan-blok-pembahasan");
+      const teksPembahasan = document.getElementById("latihan-teks-pembahasan");
+      const mediaPembahasan = document.getElementById("latihan-media-pembahasan");
+
+      teksPembahasan.innerText = `Jawaban Anda: ${userAns} (${isCorrect ? 'BENAR ✅' : 'SALAH ❌'})\nKunci Jawaban: ${q.jawaban}\n\n${q.pembahasan || 'Tidak ada pembahasan khusus untuk soal ini.'}`;
+
+      mediaPembahasan.innerHTML = "";
+      if (q.img_pembahasan) {
+        mediaPembahasan.innerHTML += `<img src="${q.img_pembahasan}" class="max-h-60 rounded-xl border mx-auto" />`;
+      }
+
+      if (q.yt_link) {
+        const ytId = getYoutubeId(q.yt_link);
+        if (ytId) {
+          const start = q.yt_start || 0;
+          const end = q.yt_end ? `&end=${q.yt_end}` : "";
+          mediaPembahasan.innerHTML += `
+            <div class="aspect-video w-full rounded-xl overflow-hidden mt-2">
+              <iframe class="w-full h-full" src="https://www.youtube.com/embed/${ytId}?start=${start}${end}" frameborder="0" allowfullscreen></iframe>
+            </div>
+          `;
+        }
+      }
+
+      blokPembahasan.classList.remove("hidden");
+    };
+
+    // FUNGSI TOMBOL "SOAL BERIKUTNYA"
+    window.geserLatihanLanjut = function() {
+      if (window.st.idx < window.st.soal.length - 1) {
+        window.st.idx++;
+        window.tampilSoal(window.st.idx);
+      } else {
+        if (window.st.jenis === "latihan") {
+          window.bukaModalDialog("Latihan Selesai", "Selamat! Anda telah menyelesaikan seluruh soal pada paket latihan ini.");
+          window.kembaliKeDash();
+        } else if (window.st.jenis === "ujian") {
+          window.konfirmasiSelesaikanUjian();
+        }
+      }
+    };
+
+    // FUNGSI TOMBOL "SOAL SEBELUMNYA"
+    window.geserSoalSebelumnya = function() {
+      if (window.st.idx > 0) {
+        window.st.idx--;
+        window.tampilSoal(window.st.idx);
+      }
+    };
+
+    // RENDER NAVIGASI NOMOR SOAL (UJIAN)
+    window.renderNavigasiSoal = function() {
+      const grid = document.getElementById("grid-navigasi-soal");
+      if (!grid) return;
+      grid.innerHTML = "";
+
+      let countTerjawab = 0;
+
+      window.st.soal.forEach((s, i) => {
+        const isAns = !!window.st.jwb[i];
+        if (isAns) countTerjawab++;
+
+        const isCurrent = i === window.st.idx;
+
+        let btnClass = "py-2 text-xs font-bold rounded-xl border transition text-center ";
+        if (isCurrent) {
+          btnClass += "border-2 border-indigo-600 bg-indigo-50 text-indigo-700 shadow-sm";
+        } else if (isAns) {
+          btnClass += "bg-emerald-600 text-white border-emerald-600";
+        } else {
+          btnClass += "bg-slate-50 text-slate-600 border-slate-200 hover:bg-slate-100";
+        }
+
+        grid.innerHTML += `
+          <button onclick="window.tampilSoal(${i})" class="${btnClass}">${i + 1}</button>
+        `;
+      });
+
+      const infoTerjawab = document.getElementById("info-terjawab");
+      if (infoTerjawab) {
+        infoTerjawab.innerText = `${countTerjawab} dari ${window.st.soal.length} Terjawab`;
+      }
+    };
+
+    // KONFIRMASI DAN SELESAIKAN UJIAN
+    window.konfirmasiSelesaikanUjian = function() {
+      const totalSoal = window.st.soal.length;
+      const countTerjawab = Object.keys(window.st.jwb).length;
+      const confirmMsg = `Apakah Anda yakin ingin menyelesaikan ujian?\n\nTerjawab: ${countTerjawab} dari ${totalSoal} soal.`;
+
+      if (confirm(confirmMsg)) {
+        window.selesaikanUjian();
+      }
+    };
+
+    window.selesaikanUjian = function() {
+      if (window.st.timerInterval) clearInterval(window.st.timerInterval);
+
+      let benar = 0;
+      let salah = 0;
+      const totalSoal = window.st.soal.length;
+
+      window.st.soal.forEach((q, i) => {
+        const userAns = window.st.jwb[i];
+        if (userAns && userAns === q.jawaban) {
+          benar++;
+        } else {
+          salah++;
+        }
+      });
+
+      const skorMax = 100;
+      const skorUser = totalSoal > 0 ? Math.round((benar / totalSoal) * skorMax) : 0;
+
+      const m = String(Math.floor(window.st.detikBerjalan / 60)).padStart(2, '0');
+      const s = String(window.st.detikBerjalan % 60).padStart(2, '0');
+
+      document.getElementById("hasil-nama-paket").innerText = window.st.soal[0]?.paket || "Paket Ujian";
+      document.getElementById("hasil-skor-user").innerText = skorUser;
+      document.getElementById("hasil-skor-max").innerText = skorMax;
+      document.getElementById("hasil-detail-jawaban").innerText = `Benar: ${benar} | Salah: ${salah} | Total Soal: ${totalSoal}`;
+      document.getElementById("hasil-total-waktu").innerText = `Total Waktu: ${m}:${s}`;
+
+      document.getElementById("area-latihan-soal").classList.add("hidden");
+      document.getElementById("area-hasil-ujian").classList.remove("hidden");
+      window.pindahHalamanInternal("hasil-ujian");
+    };
+
+    // LIHAT PEMBAHASAN UJIAN
+    window.mulaiLihatPembahasanUjian = function() {
+      const container = document.getElementById("list-pembahasan-container");
+      container.innerHTML = "";
+
+      document.getElementById("pembahasan-nama-paket").innerText = window.st.soal[0]?.paket || "Paket Ujian";
+
+      window.st.soal.forEach((q, i) => {
+        const userAns = window.st.jwb[i] || "Tidak Dijawab";
+        const isCorrect = userAns === q.jawaban;
+
+        let imgSoalHtml = q.gambar_soal ? `<img src="${q.gambar_soal}" class="max-h-60 rounded-xl border mx-auto mb-3" />` : "";
+        let imgPembahasanHtml = q.img_pembahasan ? `<img src="${q.img_pembahasan}" class="max-h-60 rounded-xl border mx-auto mt-2" />` : "";
+        
+        let ytHtml = "";
+        if (q.yt_link) {
+          const ytId = getYoutubeId(q.yt_link);
+          if (ytId) {
+            const start = q.yt_start || 0;
+            const end = q.yt_end ? `&end=${q.yt_end}` : "";
+            ytHtml = `<div class="aspect-video w-full rounded-xl overflow-hidden mt-2"><iframe class="w-full h-full" src="https://www.youtube.com/embed/${ytId}?start=${start}${end}" frameborder="0" allowfullscreen></iframe></div>`;
+          }
+        }
+
+        container.innerHTML += `
+          <div class="bg-white p-6 rounded-3xl border border-slate-200 shadow-sm space-y-4">
+            <div class="flex items-center justify-between border-b pb-3">
+              <span class="font-bold text-xs text-slate-500">Soal #${i + 1}</span>
+              <span class="px-2.5 py-1 rounded-lg text-[10px] font-black ${isCorrect ? 'bg-emerald-100 text-emerald-800' : 'bg-red-100 text-red-800'}">
+                ${isCorrect ? 'BENAR' : 'SALAH'}
+              </span>
+            </div>
+            ${imgSoalHtml}
+            <p class="text-sm text-slate-800 font-medium whitespace-pre-line">${q.soal}</p>
+
+            <div class="p-4 bg-slate-50 rounded-2xl text-xs space-y-1">
+              <p><b>Jawaban Anda:</b> <span class="${isCorrect ? 'text-emerald-600 font-bold' : 'text-red-600 font-bold'}">${userAns}</span></p>
+              <p><b>Kunci Jawaban:</b> <span class="text-emerald-600 font-bold">${q.jawaban}</span></p>
+            </div>
+
+            <div class="p-4 bg-indigo-50/70 border border-indigo-200 rounded-2xl text-xs text-indigo-900 space-y-2">
+              <p class="font-bold">💡 Pembahasan:</p>
+              <p class="whitespace-pre-line">${q.pembahasan || 'Tidak ada pembahasan khusus.'}</p>
+              ${imgPembahasanHtml}
+              ${ytHtml}
+            </div>
+          </div>
+        `;
+      });
+
+      document.getElementById("area-hasil-ujian").classList.add("hidden");
+      document.getElementById("area-pembahasan-keseluruhan").classList.remove("hidden");
+      window.pindahHalamanInternal("pembahasan-keseluruhan");
+    };
+
+    // Attach fungsi global untuk onclick di HTML
+    window.geserLatihanLanjut = geserLatihanLanjut;
+    window.geserSoalSebelumnya = geserSoalSebelumnya;
+    window.cekJawabanLatihan = cekJawabanLatihan;
+    window.konfirmasiSelesaikanUjian = konfirmasiSelesaikanUjian;
+    window.mulaiLihatPembahasanUjian = mulaiLihatPembahasanUjian;
   </script>
 </body>
 </html>
