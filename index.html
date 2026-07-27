@@ -16,6 +16,25 @@
     body { font-family: 'Inter', sans-serif; }
     .hide-scroll::-webkit-scrollbar { display: none; }
     .hide-scroll { -ms-overflow-style: none; scrollbar-width: none; }
+    
+    /* Style Editor Materi Rich Text */
+    .editor-content {
+      min-height: 250px;
+      outline: none;
+    }
+    .editor-content img {
+      max-width: 100%;
+      height: auto;
+      resize: both;
+      overflow: auto;
+      display: inline-block;
+      border: 2px dashed #cbd5e1;
+      padding: 2px;
+      border-radius: 8px;
+    }
+    .editor-content img:focus, .editor-content img:hover {
+      border-color: #6366f1;
+    }
   </style>
 </head>
 <body class="bg-slate-50 text-slate-800 min-h-screen flex flex-col antialiased">
@@ -55,12 +74,9 @@
     <!-- PANEL AUTH -->
     <div id="auth-panel" class="max-w-md mx-auto my-8 sm:my-12 bg-white p-6 sm:p-8 rounded-3xl border border-slate-200 shadow-xl space-y-6">
        <div class="flex flex-col items-center text-center space-y-3 pt-2">
-          <div class="w-16 h-16 bg-gradient-to-tr from-indigo-600 to-indigo-800 rounded-2xl flex items-center justify-center text-white shadow-lg shadow-indigo-500/20">
-             <svg xmlns="http://www.w3.org/2000/svg" class="h-9 w-9" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 14l9-5-9-5-9 5 9 5z" />
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 14l6.16-3.422a12.083 12.083 0 01.665 6.479A11.952 11.952 0 0012 20.055a11.952 11.952 0 00-6.824-2.998 12.078 12.078 0 01.665-6.479L12 14z" />
-             </svg>
-          </div>
+          <!-- LOGO BARU DARI GITHUB -->
+          <img src="logo.png" alt="Logo Portal" class="w-16 h-16 object-contain drop-shadow-md">
+          
           <div>
              <h2 class="text-3xl font-black text-indigo-950 tracking-tight">CAT</h2>
              <p class="text-xs font-black text-indigo-600 tracking-wider uppercase leading-none mt-1">PORTAL PESERTA & ADMIN</p>
@@ -418,13 +434,56 @@
           </form>
        </div>
 
-       <!-- TAB 3: MATERI PRO -->
+       <!-- TAB 3: MATERI PRO DENGAN WYSIWYG RICH TEXT EDITOR -->
        <div id="panel-admin-materi" class="bg-white p-6 sm:p-8 rounded-3xl border border-slate-200 shadow-sm space-y-6 hidden">
           <h3 class="text-base font-black text-slate-800">Form Input Materi PRO</h3>
           <form onsubmit="adminSubmitMateri(event)" class="space-y-4">
              <input type="text" id="adm-materi-judul" required class="w-full px-4 py-3 bg-slate-50 border rounded-2xl text-sm" placeholder="Judul Materi">
-             <textarea id="adm-materi-isi" required rows="5" class="w-full px-4 py-3 bg-slate-50 border rounded-2xl text-sm" placeholder="Uraian Materi..."></textarea>
-             <button type="submit" class="w-full py-3.5 bg-indigo-600 text-white rounded-2xl font-black text-xs">UNGGAH MATERI PRO</button>
+             
+             <!-- TOOLBAR KETIK MATERI ALA WORD -->
+             <div class="border border-slate-200 rounded-2xl overflow-hidden bg-slate-50">
+                <div class="flex flex-wrap items-center gap-1.5 p-2 bg-slate-100 border-b border-slate-200 text-xs text-slate-700">
+                   <button type="button" onclick="formatDoc('bold')" class="px-2.5 py-1.5 bg-white border rounded-lg font-black hover:bg-slate-200" title="Tebal (Bold)"><b>B</b></button>
+                   <button type="button" onclick="formatDoc('italic')" class="px-2.5 py-1.5 bg-white border rounded-lg italic font-bold hover:bg-slate-200" title="Miring (Italic)"><i>I</i></button>
+                   <button type="button" onclick="formatDoc('underline')" class="px-2.5 py-1.5 bg-white border rounded-lg underline font-bold hover:bg-slate-200" title="Garis Bawah (Underline)"><u>U</u></button>
+                   <button type="button" onclick="formatDoc('strikeThrough')" class="px-2.5 py-1.5 bg-white border rounded-lg line-through hover:bg-slate-200" title="Coret">S</button>
+                   
+                   <span class="h-5 w-px bg-slate-300 mx-1"></span>
+
+                   <button type="button" onclick="formatDoc('justifyLeft')" class="px-2.5 py-1.5 bg-white border rounded-lg hover:bg-slate-200" title="Rata Kiri">⬅️ Kiri</button>
+                   <button type="button" onclick="formatDoc('justifyCenter')" class="px-2.5 py-1.5 bg-white border rounded-lg hover:bg-slate-200" title="Rata Tengah">↔️ Tengah</button>
+                   <button type="button" onclick="formatDoc('justifyRight')" class="px-2.5 py-1.5 bg-white border rounded-lg hover:bg-slate-200" title="Rata Kanan">➡️ Kanan</button>
+                   <button type="button" onclick="formatDoc('justifyFull')" class="px-2.5 py-1.5 bg-white border rounded-lg hover:bg-slate-200" title="Rata Kiri Kanan">↕️ Justify</button>
+
+                   <span class="h-5 w-px bg-slate-300 mx-1"></span>
+
+                   <button type="button" onclick="formatDoc('insertOrderedList')" class="px-2.5 py-1.5 bg-white border rounded-lg font-bold hover:bg-slate-200" title="Penomoran">1.</button>
+                   <button type="button" onclick="formatDoc('insertUnorderedList')" class="px-2.5 py-1.5 bg-white border rounded-lg font-bold hover:bg-slate-200" title="Bullet Points">•</button>
+
+                   <span class="h-5 w-px bg-slate-300 mx-1"></span>
+
+                   <select onchange="formatDoc('formatBlock', this.value); this.selectedIndex=0;" class="px-2 py-1 bg-white border rounded-lg text-xs">
+                      <option value="">Ukuran Judul</option>
+                      <option value="H1">Judul Besar (H1)</option>
+                      <option value="H2">Sub Judul (H2)</option>
+                      <option value="H3">Judul Kecil (H3)</option>
+                      <option value="P">Teks Normal (Paragraf)</option>
+                   </select>
+
+                   <span class="h-5 w-px bg-slate-300 mx-1"></span>
+
+                   <!-- SISIPKAN / UPLOAD GAMBAR BARU -->
+                   <label class="px-2.5 py-1.5 bg-indigo-50 text-indigo-600 border border-indigo-200 rounded-lg cursor-pointer hover:bg-indigo-100 font-bold flex items-center gap-1">
+                      🖼️ Sisipkan Gambar
+                      <input type="file" accept="image/*" class="hidden" onchange="sisipkanGambarEditor(event)">
+                   </label>
+                </div>
+
+                <!-- AREA EDITABLE TEKS MATERI -->
+                <div id="adm-materi-editor" contenteditable="true" class="editor-content p-4 text-sm bg-white font-normal" placeholder="Ketikkan materi di sini... Anda juga bisa paste gambar langsung (Ctrl+V) dan menarik ukuran gambar secara langsung."></div>
+             </div>
+
+             <button type="submit" class="w-full py-3.5 bg-indigo-600 text-white rounded-2xl font-black text-xs hover:bg-indigo-700 transition">UNGGAH MATERI PRO</button>
           </form>
        </div>
 
@@ -440,10 +499,22 @@
 
        <!-- TAB 5: KELOLA PESERTA -->
        <div id="panel-admin-peserta" class="bg-white p-6 sm:p-8 rounded-3xl border border-slate-200 shadow-sm space-y-6 hidden">
-          <div class="flex items-center justify-between border-b pb-3">
+          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b pb-3">
              <h3 class="text-base font-black text-slate-800">Daftar Akun Peserta</h3>
-             <button onclick="adminLoadDaftarPeserta()" class="px-3 py-1 bg-indigo-50 text-indigo-600 text-xs font-bold rounded-lg">Refresh</button>
+             <button onclick="adminLoadDaftarPeserta()" class="px-3 py-1 bg-indigo-50 text-indigo-600 text-xs font-bold rounded-lg hover:bg-indigo-100 transition">Refresh Data</button>
           </div>
+
+          <!-- FORM PENCARIAN PESERTA (NAMA, EMAIL, NO HP) -->
+          <div class="bg-slate-50 p-4 rounded-2xl border space-y-3">
+             <p class="text-[10px] font-black text-slate-400 uppercase">🔍 Cari Akun Peserta</p>
+             <div class="flex flex-col sm:flex-row gap-2">
+                <input type="text" id="cari-peserta-input" onkeyup="cariPesertaLocal()" class="flex-1 px-4 py-2.5 bg-white border border-slate-200 rounded-xl text-xs" placeholder="Ketik Email, Nama Lengkap, atau No. HP peserta...">
+                <button type="button" onclick="cariPesertaLocal()" class="px-4 py-2.5 bg-indigo-600 text-white rounded-xl font-bold text-xs hover:bg-indigo-700 transition">
+                   Cari Peserta
+                </button>
+             </div>
+          </div>
+
           <div class="overflow-x-auto">
              <table class="w-full text-left text-xs text-slate-600">
                 <thead>
@@ -451,11 +522,13 @@
                       <th class="py-3 px-4">Nama</th>
                       <th class="py-3 px-4">Email</th>
                       <th class="py-3 px-4">No. HP</th>
-                      <th class="py-3 px-4">Status</th>
+                      <th class="py-3 px-4">Status / Tipe</th>
                       <th class="py-3 px-4 text-center">Aksi</th>
                    </tr>
                 </thead>
-                <tbody id="adm-tabel-peserta-body" class="divide-y"></tbody>
+                <tbody id="adm-tabel-peserta-body" class="divide-y">
+                   <tr><td colspan="5" class="py-4 text-center text-slate-400">Klik refresh untuk memuat data peserta...</td></tr>
+                </tbody>
              </table>
           </div>
        </div>
@@ -687,19 +760,114 @@
       isReviewMode: false 
     };
     window.semuaSoalCache = [];
+    window.semuaPesertaCache = [];
 
-    // FUNGSI NAVIGASI UNTUK CEGAH KELUAR APLIKASI SAAT TEKAN BACK PADA HP
+    // FUNGSI UTILS & MODAL DIALOG
+    window.bukaModalDialog = function(judul, pesan) {
+      document.getElementById("modal-title").innerText = judul;
+      document.getElementById("modal-desc").innerText = pesan;
+      document.getElementById("custom-modal").classList.remove("hidden");
+    };
+
+    window.tutupModalDialog = function() {
+      document.getElementById("custom-modal").classList.add("hidden");
+    };
+
+    window.bukaModalUpgrade = function() {
+      document.getElementById("modal-up").classList.remove("hidden");
+    };
+
+    window.tutupModalUpgrade = function() {
+      document.getElementById("modal-up").classList.add("hidden");
+    };
+
+    window.renderHeaderProfil = function() {
+      if (!window.uAktif) return;
+      document.getElementById("nama-peserta").innerText = window.uAktif.nama || "Peserta";
+      document.getElementById("badge-peserta").innerText = (window.uAktif.tipe || "FREE") + " MEMBER";
+      document.getElementById("avatar-peserta").innerText = (window.uAktif.nama || "P").charAt(0).toUpperCase();
+    };
+
+    window.pilihTabAuth = function(tab) {
+      if(tab === 'login') {
+        document.getElementById('form-login').classList.remove('hidden');
+        document.getElementById('form-daftar').classList.add('hidden');
+        document.getElementById('tab-login-btn').className = "flex-1 py-3 text-center text-xs font-black rounded-xl transition-all duration-200 bg-white shadow text-indigo-600";
+        document.getElementById('tab-daftar-btn').className = "flex-1 py-3 text-center text-xs font-black rounded-xl transition-all duration-200 text-slate-500 hover:text-slate-800";
+      } else {
+        document.getElementById('form-daftar').classList.remove('hidden');
+        document.getElementById('form-login').classList.add('hidden');
+        document.getElementById('tab-daftar-btn').className = "flex-1 py-3 text-center text-xs font-black rounded-xl transition-all duration-200 bg-white shadow text-indigo-600";
+        document.getElementById('tab-login-btn').className = "flex-1 py-3 text-center text-xs font-black rounded-xl transition-all duration-200 text-slate-500 hover:text-slate-800";
+      }
+    };
+
+    window.kembaliKeDash = function() {
+      if(window.st.timerInterval) clearInterval(window.st.timerInterval);
+      document.getElementById("area-pilih-paket").classList.add("hidden");
+      document.getElementById("area-latihan-soal").classList.add("hidden");
+      document.getElementById("area-hasil-ujian").classList.add("hidden");
+      document.getElementById("area-pembahasan-keseluruhan").classList.add("hidden");
+      document.getElementById("area-informasi").classList.add("hidden");
+      document.getElementById("area-materi").classList.add("hidden");
+
+      if (window.uAktif && window.uAktif.role === "admin") {
+        document.getElementById("dash-admin").classList.remove("hidden");
+      } else {
+        document.getElementById("dash-peserta").classList.remove("hidden");
+      }
+    };
+
+    // FORMAT EDITOR TEKS MATERI (WORD TOOLBAR)
+    window.formatDoc = function(cmd, value = null) {
+      document.execCommand(cmd, false, value);
+    };
+
+    // SISIPKAN GAMBAR VIA INPUT UNTUK MATERI
+    window.sisipkanGambarEditor = function(e) {
+      const file = e.target.files[0];
+      if (file) {
+        const reader = new FileReader();
+        reader.onload = function(evt) {
+          document.execCommand('insertImage', false, evt.target.result);
+        };
+        reader.readAsDataURL(file);
+      }
+    };
+
+    // SUPPORT PASTE GAMBAR DARI CLIPBOARD KE EDITOR MATERI
+    document.addEventListener("DOMContentLoaded", () => {
+      const editor = document.getElementById("adm-materi-editor");
+      if(editor) {
+        editor.addEventListener("paste", function(e) {
+          const items = (e.clipboardData || e.originalEvent.clipboardData).items;
+          for (const item of items) {
+            if (item.type.indexOf("image") === 0) {
+              e.preventDefault();
+              const blob = item.getAsFile();
+              const reader = new FileReader();
+              reader.onload = function(evt) {
+                document.execCommand('insertImage', false, evt.target.result);
+              };
+              reader.readAsDataURL(blob);
+            }
+          }
+        });
+      }
+    });
+
+    // FUNGSI NAVIGASI INTERNAL
     window.pindahHalamanInternal = function(viewId) {
       history.pushState({ view: viewId }, "", "#" + viewId);
     };
 
     window.addEventListener("popstate", function(e) {
       if (window.uAktif) {
-        window.kembaliKeDash(true);
+        window.kembaliKeDash();
       }
     });
 
-    // FUNGSI UTILITAS: Mengubah File Lokal ke String Base64
+    // CONVERT FILE KE BASE64
     const convertFileToBase64 = (fileInputId) => {
       return new Promise((resolve) => {
         const fileInput = document.getElementById(fileInputId);
@@ -714,7 +882,7 @@
       });
     };
 
-    // FUNGSI UTILITAS: ACAK ARRAY (Fisher-Yates Shuffle)
+    // SHUFFLE ARRAY
     function shuffleArray(array) {
       const arr = [...array];
       for (let i = arr.length - 1; i > 0; i--) {
@@ -724,7 +892,6 @@
       return arr;
     }
 
-    // FUNGSI HELPER EXTRACT ID YOUTUBE
     function getYoutubeId(url) {
       if(!url) return null;
       const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=)([^#\&\?]*).*/;
@@ -732,7 +899,6 @@
       return (match && match[2].length === 11) ? match[2] : null;
     }
 
-    // FUNGSI HELPER TANGGAL LOKAL (Format YYYY-MM-DD)
     function getTodayString() {
       const d = new Date();
       const year = d.getFullYear();
@@ -747,11 +913,11 @@
         const userRef = doc(db, "users", user.uid);
         let userDoc = await getDoc(userRef);
         
-        // Buat record baru jika login Google pertama kali
         if (!userDoc.exists()) {
           await setDoc(userRef, {
             nama: user.displayName || "Peserta Google",
             hp: "-",
+            email: user.email || "-",
             role: "peserta",
             tipe: "free",
             createdAt: new Date().toISOString()
@@ -794,13 +960,16 @@
       try {
         window.bukaModalDialog("Memproses...", "Mendaftarkan akun...");
         const res = await createUserWithEmailAndPassword(auth, email, pass);
+        
         await setDoc(doc(db, "users", res.user.uid), {
           nama: nama,
           hp: hp,
+          email: email,
           role: "peserta",
           tipe: "free",
           createdAt: new Date().toISOString()
         });
+        
         window.tutupModalDialog();
         window.bukaModalDialog("Berhasil", "Akun peserta berhasil dibuat!");
       } catch (err) {
@@ -836,7 +1005,7 @@
         window.bukaModalDialog("Memproses...", "Mengirim tautan atur ulang kata sandi...");
         await sendPasswordResetEmail(auth, email);
         window.tutupModalDialog();
-        window.bukaModalDialog("Berhasil", "Link atur ulang kata sandi telah dikirim ke email Anda. Silakan periksa inbox/spam email.");
+        window.bukaModalDialog("Berhasil", "Link atur ulang kata sandi telah dikirim ke email Anda.");
       } catch (err) {
         window.tutupModalDialog();
         window.bukaModalDialog("Gagal Send Email", err.message);
@@ -886,6 +1055,234 @@
       }
     };
 
+    // KELOLA PESERTA (NAMA, EMAIL, NO HP & FILTER PENCARIAN)
+    window.adminLoadDaftarPeserta = async function() {
+      const tbody = document.getElementById("adm-tabel-peserta-body");
+      tbody.innerHTML = `<tr><td colspan="5" class="py-4 text-center">Memuat data peserta...</td></tr>`;
+
+      try {
+        const snap = await getDocs(collection(db, "users"));
+        window.semuaPesertaCache = [];
+
+        snap.forEach(d => {
+          const item = { id: d.id, ...d.data() };
+          if(item.role !== "admin") {
+            window.semuaPesertaCache.push(item);
+          }
+        });
+
+        window.renderTabelPeserta(window.semuaPesertaCache);
+      } catch(e) {
+        tbody.innerHTML = `<tr><td colspan="5" class="py-4 text-center text-red-500">${e.message}</td></tr>`;
+      }
+    };
+
+    window.renderTabelPeserta = function(list) {
+      const tbody = document.getElementById("adm-tabel-peserta-body");
+      tbody.innerHTML = "";
+
+      if(!list || list.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="5" class="py-4 text-center text-slate-400">Tidak ada peserta yang ditemukan.</td></tr>`;
+        return;
+      }
+
+      list.forEach(p => {
+        const isPro = (p.tipe === "pro");
+        tbody.innerHTML += `
+          <tr class="hover:bg-slate-50 border-b">
+             <td class="py-3 px-4 font-bold text-slate-800">${p.nama || '-'}</td>
+             <td class="py-3 px-4 text-indigo-600 font-medium">${p.email || '-'}</td>
+             <td class="py-3 px-4 text-slate-600">${p.hp || '-'}</td>
+             <td class="py-3 px-4">
+                <span class="px-2 py-0.5 rounded-md text-[9px] font-black ${isPro ? 'bg-amber-100 text-amber-800' : 'bg-slate-100 text-slate-600'}">
+                   ${(p.tipe || 'free').toUpperCase()}
+                </span>
+             </td>
+             <td class="py-3 px-4 text-center space-x-2">
+                <button onclick="toggleStatusPro('${p.id}', '${p.tipe}')" class="px-2.5 py-1 ${isPro ? 'bg-slate-700' : 'bg-amber-500'} text-white rounded-lg text-[10px] font-bold hover:opacity-90">
+                   ${isPro ? 'Jadikan Free' : 'Ubah ke PRO'}
+                </button>
+                <button onclick="hapusPeserta('${p.id}')" class="px-2.5 py-1 bg-red-600 text-white rounded-lg text-[10px] font-bold hover:bg-red-700">Hapus</button>
+             </td>
+          </tr>`;
+      });
+    };
+
+    // SEARCH REALTIME PESERTA BERDASARKAN EMAIL, NAMA, DAN NO HP
+    window.cariPesertaLocal = function() {
+      const q = document.getElementById("cari-peserta-input").value.toLowerCase().trim();
+      const filtered = window.semuaPesertaCache.filter(p => {
+        const matchNama = (p.nama || "").toLowerCase().includes(q);
+        const matchEmail = (p.email || "").toLowerCase().includes(q);
+        const matchHp = (p.hp || "").toLowerCase().includes(q);
+        return matchNama || matchEmail || matchHp;
+      });
+      window.renderTabelPeserta(filtered);
+    };
+
+    window.toggleStatusPro = async function(uid, curTipe) {
+      const targetTipe = (curTipe === "pro") ? "free" : "pro";
+      try {
+        window.bukaModalDialog("Memproses...", "Memperbarui status member...");
+        await updateDoc(doc(db, "users", uid), { tipe: targetTipe });
+        window.tutupModalDialog();
+        window.adminLoadDaftarPeserta();
+      } catch(e) {
+        window.tutupModalDialog();
+        window.bukaModalDialog("Gagal Update", e.message);
+      }
+    };
+
+    window.hapusPeserta = async function(uid) {
+      if(confirm("Apakah Anda yakin ingin menghapus akun peserta ini?")) {
+        try {
+          window.bukaModalDialog("Memproses...", "Menghapus peserta...");
+          await deleteDoc(doc(db, "users", uid));
+          window.tutupModalDialog();
+          window.adminLoadDaftarPeserta();
+        } catch(e) {
+          window.tutupModalDialog();
+          window.bukaModalDialog("Gagal Hapus", e.message);
+        }
+      }
+    };
+
+    // SUBMIT MATERI PRO DENGAN ISI EDITABLE HTML EDITOR
+    window.adminSubmitMateri = async function(e) {
+      e.preventDefault();
+      const judul = document.getElementById("adm-materi-judul").value;
+      const isiHtml = document.getElementById("adm-materi-editor").innerHTML;
+
+      if(!isiHtml || isiHtml.trim() === "") {
+        window.bukaModalDialog("Perhatian", "Silakan ketikkan materi pembelajaran terlebih dahulu.");
+        return;
+      }
+
+      try {
+        window.bukaModalDialog("Memproses...", "Menyimpan materi PRO ke database...");
+        await addDoc(collection(db, "materi"), {
+          judul: judul,
+          isi: isiHtml,
+          createdAt: new Date().toISOString()
+        });
+        window.tutupModalDialog();
+        window.bukaModalDialog("Berhasil", "Materi PRO berhasil dipublikasikan!");
+        document.getElementById("adm-materi-judul").value = "";
+        document.getElementById("adm-materi-editor").innerHTML = "";
+      } catch(err) {
+        window.tutupModalDialog();
+        window.bukaModalDialog("Gagal Simpan Materi", err.message);
+      }
+    };
+
+    // SUBMIT INFORMASI
+    window.adminSubmitInformasi = async function(e) {
+      e.preventDefault();
+      const judul = document.getElementById("adm-info-judul").value;
+      const teks = document.getElementById("adm-info-teks").value;
+
+      try {
+        window.bukaModalDialog("Memproses...", "Menyimpan pengumuman...");
+        await addDoc(collection(db, "informasi"), {
+          judul: judul,
+          teks: teks,
+          createdAt: new Date().toISOString()
+        });
+        window.tutupModalDialog();
+        window.bukaModalDialog("Berhasil", "Informasi berhasil diterbitkan!");
+        document.getElementById("adm-info-judul").value = "";
+        document.getElementById("adm-info-teks").value = "";
+      } catch(err) {
+        window.tutupModalDialog();
+        window.bukaModalDialog("Gagal Simpan", err.message);
+      }
+    };
+
+    // BUKA MENU INFORMASI PESERTA
+    window.bukaMenuInformasi = async function() {
+      window.bukaModalDialog("Memuat...", "Membaca pengumuman...");
+      try {
+        const snap = await getDocs(collection(db, "informasi"));
+        window.tutupModalDialog();
+        
+        const listDiv = document.getElementById("list-informasi");
+        listDiv.innerHTML = "";
+
+        if(snap.empty) {
+          listDiv.innerHTML = `<div class="bg-white p-6 rounded-3xl text-center border text-slate-400">Belum ada informasi terbaru.</div>`;
+        } else {
+          snap.forEach(d => {
+            const data = d.data();
+            listDiv.innerHTML += `
+              <div class="bg-white p-6 rounded-3xl border border-slate-200 shadow-sm space-y-2">
+                 <h3 class="font-black text-slate-800 text-base">${data.judul}</h3>
+                 <p class="text-xs text-slate-600 leading-relaxed whitespace-pre-line">${data.teks}</p>
+                 <span class="text-[9px] text-slate-400 font-bold block pt-2">${new Date(data.createdAt).toLocaleDateString('id-ID')}</span>
+              </div>`;
+          });
+        }
+
+        document.getElementById("dash-peserta").classList.add("hidden");
+        document.getElementById("area-informasi").classList.remove("hidden");
+        window.pindahHalamanInternal("informasi");
+      } catch(e) {
+        window.tutupModalDialog();
+        window.bukaModalDialog("Gagal Memuat", e.message);
+      }
+    };
+
+    // BUKA MENU MATERI PESERTA PRO
+    window.bukaMenuMateri = async function() {
+      const isUserPro = window.uAktif && window.uAktif.tipe === "pro";
+      if (!isUserPro) {
+        window.bukaModalUpgrade();
+        return;
+      }
+
+      window.bukaModalDialog("Memuat...", "Membaca materi PRO...");
+      try {
+        const snap = await getDocs(collection(db, "materi"));
+        window.tutupModalDialog();
+        
+        const listDiv = document.getElementById("list-materi");
+        listDiv.innerHTML = "";
+
+        if(snap.empty) {
+          listDiv.innerHTML = `<div class="col-span-full bg-white p-6 rounded-3xl text-center border text-slate-400">Belum ada modul materi PRO yang diunggah.</div>`;
+        } else {
+          snap.forEach(d => {
+            const data = d.data();
+            listDiv.innerHTML += `
+              <div class="bg-white p-6 rounded-3xl border border-slate-200 shadow-sm space-y-3">
+                 <span class="px-2 py-0.5 bg-amber-100 text-amber-800 rounded-md text-[9px] font-black uppercase">EKSKLUSIF PRO</span>
+                 <h3 class="font-black text-slate-800 text-base">${data.judul}</h3>
+                 <div class="text-xs text-slate-600 leading-relaxed space-y-2 editor-content">${data.isi}</div>
+              </div>`;
+          });
+        }
+
+        document.getElementById("dash-peserta").classList.add("hidden");
+        document.getElementById("area-materi").classList.remove("hidden");
+        window.pindahHalamanInternal("materi");
+      } catch(e) {
+        window.tutupModalDialog();
+        window.bukaModalDialog("Gagal Memuat", e.message);
+      }
+    };
+
+    window.sinkronkanTipeAkun = async function() {
+      if(!window.uAktif) return;
+      window.bukaModalDialog("Memperbarui...", "Mengecek status akun...");
+      const snap = await getDoc(doc(db, "users", window.uAktif.uid));
+      window.tutupModalDialog();
+      if(snap.exists()) {
+        window.uAktif = { uid: snap.id, email: window.uAktif.email, ...snap.data() };
+        window.renderHeaderProfil();
+        document.getElementById("dash-tipe-badge").innerText = (window.uAktif.tipe || "FREE").toUpperCase();
+        window.bukaModalDialog("Berhasil", "Status akun telah disinkronkan!");
+      }
+    };
+
     // ADMIN SUBMIT SOAL TUNGGAL (TAMBAH / EDIT)
     window.adminSubmitSoal = async function(e) {
       e.preventDefault();
@@ -901,7 +1298,6 @@
         const newImgD = await convertFileToBase64("adm-soal-img-d-file");
         const newImgE = await convertFileToBase64("adm-soal-img-e-file");
 
-        // Media Pembahasan Tambahan
         const newImgPembahasan = await convertFileToBase64("adm-soal-pembahasan-img-file");
 
         const payload = {
@@ -928,7 +1324,6 @@
           jawaban: document.getElementById("adm-soal-rules").value.toUpperCase(),
           pembahasan: document.getElementById("adm-soal-pembahasan").value || "",
           
-          // Media Pembahasan Tambahan
           img_pembahasan: newImgPembahasan || document.getElementById("adm-soal-pembahasan-img-old").value || "",
           yt_link: document.getElementById("adm-soal-yt-link").value.trim(),
           yt_start: parseInt(document.getElementById("adm-soal-yt-start").value) || 0,
@@ -961,7 +1356,6 @@
       const tbody = document.getElementById("adm-tabel-soal-body");
       tbody.innerHTML = `<tr><td colspan="7" class="py-4 text-center">Memuat database soal...</td></tr>`;
 
-      // Reset checkbox header & tombol hapus terpilih
       const chkHeader = document.getElementById("chk-pilih-semua");
       if(chkHeader) chkHeader.checked = false;
       window.updateTombolHapusTerpilih();
@@ -983,7 +1377,6 @@
           if(item.paket) paketSet.add(item.paket);
         });
 
-        // Update Dropdown Filter Paket
         const selectPaket = document.getElementById("filter-db-paket");
         if(selectPaket) {
           const curVal = selectPaket.value;
@@ -1000,7 +1393,6 @@
       }
     };
 
-    // RENDER TABEL DATABASE BERDASARKAN FILTER GROUPING
     window.renderTabelDatabaseSoal = function(dataList) {
       const tbody = document.getElementById("adm-tabel-soal-body");
       tbody.innerHTML = "";
@@ -1034,7 +1426,6 @@
       });
     };
 
-    // FILTER DATABASE SOAL BERDASARKAN JENIS DAN PAKET
     window.filterDatabaseSoal = function() {
       const fJenis = document.getElementById("filter-db-jenis").value;
       const fPaket = document.getElementById("filter-db-paket").value;
@@ -1048,14 +1439,12 @@
       window.renderTabelDatabaseSoal(filtered);
     };
 
-    // FITUR CEKLIS SEMUA SOAL
     window.togglePilihSemuaSoal = function(source) {
       const checkboxes = document.querySelectorAll('.chk-soal-item');
       checkboxes.forEach(cb => cb.checked = source.checked);
       window.updateTombolHapusTerpilih();
     };
 
-    // HITUNG CEKLIS & TAMPILKAN TOMBOL HAPUS TERPILIH
     window.updateTombolHapusTerpilih = function() {
       const checkedBoxes = document.querySelectorAll('.chk-soal-item:checked');
       const btnHapus = document.getElementById('btn-hapus-terpilih');
@@ -1070,7 +1459,6 @@
       }
     };
 
-    // HAPUS BANYAK SOAL TERPILIH (BULK DELETE)
     window.adminHapusSoalTerpilih = async function() {
       const checkedBoxes = document.querySelectorAll('.chk-soal-item:checked');
       const total = checkedBoxes.length;
@@ -1127,7 +1515,6 @@
       document.getElementById("adm-soal-rules").value = target.jawaban || "A";
       document.getElementById("adm-soal-pembahasan").value = target.pembahasan || "";
 
-      // Media Pembahasan Tambahan
       document.getElementById("adm-soal-pembahasan-img-old").value = target.img_pembahasan || "";
       document.getElementById("adm-soal-yt-link").value = target.yt_link || "";
       document.getElementById("adm-soal-yt-start").value = target.yt_start || 0;
@@ -1172,7 +1559,6 @@
       }
     };
 
-    // UNDUH FORMAT EXCEL TEMPLATE
     window.unduhFormatExcel = function() {
       const sampleData = [
         {
@@ -1186,18 +1572,6 @@
           opsi_e: "Sistem penilaian terpusat",
           jawaban: "A",
           pembahasan: "Diferensiasi pembelajaran menyesuaikan materi, proses, dan produk belajar dengan kebutuhan peserta didik."
-        },
-        {
-          jenis: "ujian",
-          paket: "SIMULASI CAT PAKET A (GRATIS)",
-          soal: "Berapakah hasil dari 15 x 12?",
-          opsi_a: "150",
-          opsi_b: "170",
-          opsi_c: "180",
-          opsi_d: "190",
-          opsi_e: "200",
-          jawaban: "C",
-          pembahasan: "15 x 12 = 180."
         }
       ];
 
@@ -1207,7 +1581,6 @@
       XLSX.writeFile(workbook, "Template_Import_Soal_CBT.xlsx");
     };
 
-    // IMPORT SOAL MASSAL EXCEL/CSV
     window.adminImportExcel = function(e) {
       e.preventDefault();
       const fileInput = document.getElementById("adm-import-excel-file");
@@ -1295,7 +1668,6 @@
       reader.readAsArrayBuffer(file);
     };
 
-    // FITUR PESERTA: PENGELOMPOKAN PAKET SOAL
     window.bukaPilihPaket = async function(mode) {
       window.bukaModalDialog("Memuat...", "Membaca paket soal...");
       try {
@@ -1379,7 +1751,6 @@
     window.mulaiMengerjakanPaket = async function(mode, paketName) {
       const isUserPro = window.uAktif && window.uAktif.tipe === "pro";
 
-      // 1. CEK AKSES DAHULU UNTUK PAKET SIMULASI UJIAN
       if (mode === "ujian" && !isUserPro) {
         const isGratisPaket = /GRATIS|FREE/i.test(paketName);
         if (!isGratisPaket) {
@@ -1406,12 +1777,9 @@
         return;
       }
 
-      // 2. LOGIKA PEMBATASAN DAN ACAK SOAL
       if (mode === "latihan") {
-        // Mengacak soal di setiap paketnya
         list = shuffleArray(list);
 
-        // Jika user FREE, batasi maksimal 10 soal per hari untuk paket ini
         if (!isUserPro) {
           const today = getTodayString();
           const keyAkses = `latihan_usage_${window.uAktif.uid}_${paketName}`;
@@ -1432,11 +1800,9 @@
             return;
           }
 
-          // Ambil sisa kuota hari ini (maksimal 10)
           const sisaKuota = 10 - usageData.count;
           list = list.slice(0, sisaKuota);
 
-          // Simpan penggunaan harian baru
           usageData.count += list.length;
           localStorage.setItem(keyAkses, JSON.stringify(usageData));
         }
@@ -1461,595 +1827,3 @@
         document.getElementById("timer-box").classList.remove("hidden");
         document.getElementById("btn-selesaikan-header").classList.remove("hidden");
         document.getElementById("box-selesai-nav").classList.remove("hidden");
-        document.getElementById("btn-cek-jawaban").classList.add("hidden");
-        
-        // Tampilkan Panel Navigasi khusus Paket Ujian
-        document.getElementById("panel-navigasi-soal-box").classList.remove("hidden");
-        document.getElementById("container-soal-utama").className = "lg:col-span-2 bg-white rounded-3xl border p-6 sm:p-8 space-y-6 shadow-sm";
-
-        // TIMER HITUNG MAJU (STOPWATCH)
-        if(window.st.timerInterval) clearInterval(window.st.timerInterval);
-        document.getElementById("timer-count").innerText = "00:00";
-        
-        window.st.timerInterval = setInterval(() => {
-          window.st.detikBerjalan++;
-          const m = Math.floor(window.st.detikBerjalan / 60);
-          const s = window.st.detikBerjalan % 60;
-          document.getElementById("timer-count").innerText = `${m < 10 ? '0'+m : m}:${s < 10 ? '0'+s : s}`;
-        }, 1000);
-
-      } else {
-        // MODE LATIHAN MANDIRI: Tanpa Navigasi Soal & Skor
-        document.getElementById("mode-badge").innerText = "MODE LATIHAN MANDIRI";
-        document.getElementById("status-mode-tag").innerText = "LATIHAN MANDIRI";
-        document.getElementById("timer-box").classList.add("hidden");
-        document.getElementById("btn-selesaikan-header").classList.add("hidden");
-        document.getElementById("box-selesai-nav").classList.add("hidden");
-        document.getElementById("btn-cek-jawaban").classList.remove("hidden");
-
-        // Sembunyikan Panel Navigasi & Buat Konten Soal Full Width
-        document.getElementById("panel-navigasi-soal-box").classList.add("hidden");
-        document.getElementById("container-soal-utama").className = "lg:col-span-3 bg-white rounded-3xl border p-6 sm:p-8 space-y-6 shadow-sm";
-
-        if(window.st.timerInterval) clearInterval(window.st.timerInterval);
-      }
-
-      tampilkanSoalLatihan();
-    };
-
-    function renderNavigasiNomor() {
-      if (window.st.jenis !== "ujian") return;
-
-      const grid = document.getElementById("grid-navigasi-soal");
-      grid.innerHTML = "";
-
-      let jumlahTerjawab = 0;
-
-      window.st.soal.forEach((s, idx) => {
-        const isSelected = window.st.jwb[idx] !== undefined;
-        if (isSelected) jumlahTerjawab++;
-
-        const isCurrent = idx === window.st.idx;
-        
-        let btnClass = "w-full aspect-square rounded-xl flex items-center justify-center font-black text-xs transition border cursor-pointer ";
-
-        if (isCurrent) {
-          btnClass += "bg-indigo-600 text-white border-indigo-700 ring-2 ring-indigo-400 ";
-        } else if (isSelected) {
-          btnClass += "bg-indigo-100 text-indigo-700 border-indigo-300 font-bold ";
-        } else {
-          btnClass += "bg-slate-50 text-slate-600 border-slate-200 hover:bg-slate-100 ";
-        }
-
-        grid.innerHTML += `
-          <button onclick="pindahKeNomor(${idx})" class="${btnClass}">
-             ${idx + 1}
-          </button>`;
-      });
-
-      document.getElementById("info-terjawab").innerText = `${jumlahTerjawab}/${window.st.soal.length} Terjawab`;
-    }
-
-    window.pindahKeNomor = function(targetIdx) {
-      window.st.idx = targetIdx;
-      tampilkanSoalLatihan();
-    };
-
-    function tampilkanSoalLatihan() {
-      const s = window.st.soal[window.st.idx];
-      
-      document.getElementById("latihan-info-judul").innerText = `${s.paket || 'Latihan'} (${window.st.idx + 1}/${window.st.soal.length})`;
-      document.getElementById("latihan-no-soal").innerText = `Soal Nomor ${window.st.idx + 1}`;
-      document.getElementById("latihan-teks-soal").innerText = s.soal;
-
-      // Atur visibilitas tombol sebelumnya
-      const btnPrev = document.getElementById("btn-latihan-prev");
-      if(window.st.idx === 0) {
-        btnPrev.classList.add("opacity-40", "pointer-events-none");
-      } else {
-        btnPrev.classList.remove("opacity-40", "pointer-events-none");
-      }
-
-      // Render Gambar Soal
-      const imgContainer = document.getElementById("latihan-gambar-container");
-      const imgSoal = document.getElementById("latihan-gambar-soal");
-      if (s.gambar_soal && s.gambar_soal.trim() !== "") {
-        imgSoal.src = s.gambar_soal;
-        imgContainer.classList.remove("hidden");
-      } else {
-        imgContainer.classList.add("hidden");
-      }
-
-      document.getElementById("latihan-blok-pembahasan").classList.add("hidden");
-
-      // Render Opsi Jawaban
-      const bOpsi = document.getElementById("latihan-list-opsi");
-      bOpsi.innerHTML = "";
-
-      const jwbDipilih = window.st.jwb[window.st.idx];
-
-      ["a", "b", "c", "d", "e"].forEach(k => {
-        const keyText = "opsi_" + k;
-        const keyImg = "img_" + k;
-        const huruf = k.toUpperCase();
-
-        if (s[keyText] && s[keyText].trim() !== "") {
-          const gambarOpsiHtml = (s[keyImg] && s[keyImg].trim() !== "") 
-            ? `<img src="${s[keyImg]}" class="mt-2 max-h-40 rounded-lg object-contain border" alt="Opsi ${huruf}">` 
-            : "";
-
-          const isSelected = jwbDipilih === huruf;
-          let classStyle = "w-full text-left p-4 bg-slate-50 border border-slate-200 rounded-2xl hover:bg-slate-100 transition cursor-pointer";
-
-          if (isSelected) {
-            classStyle = "w-full text-left p-4 bg-indigo-50 border-2 border-indigo-600 rounded-2xl transition cursor-pointer";
-          }
-
-          bOpsi.innerHTML += `
-            <button onclick="pilihOpsiLatihan('${huruf}')" id="btn-opsi-${huruf}" class="${classStyle}">
-               <div class="flex items-start gap-3">
-                  <span class="w-7 h-7 rounded-lg bg-indigo-100 text-indigo-700 flex items-center justify-center text-xs font-black shrink-0" id="badge-opsi-${huruf}">${huruf}</span>
-                  <div class="flex-1">
-                     <p class="text-sm text-slate-800">${s[keyText]}</p>
-                     ${gambarOpsiHtml}
-                  </div>
-               </div>
-            </button>`;
-        }
-      });
-
-      renderNavigasiNomor();
-    }
-
-    window.pilihOpsiLatihan = function(opsi) {
-      window.st.jwb[window.st.idx] = opsi;
-      ["A", "B", "C", "D", "E"].forEach(h => {
-        const el = document.getElementById(`btn-opsi-${h}`);
-        if (el) {
-          if (h === opsi) {
-            el.className = "w-full text-left p-4 bg-indigo-50 border-2 border-indigo-600 rounded-2xl transition cursor-pointer";
-          } else {
-            el.className = "w-full text-left p-4 bg-slate-50 border border-slate-200 rounded-2xl hover:bg-slate-100 transition cursor-pointer";
-          }
-        }
-      });
-
-      renderNavigasiNomor();
-    };
-
-    window.cekJawabanLatihan = function() {
-      const s = window.st.soal[window.st.idx];
-      const jwbUser = window.st.jwb[window.st.idx];
-      const kunci = s.jawaban;
-
-      if(!jwbUser) {
-        window.bukaModalDialog("Peringatan", "Silakan pilih salah satu jawaban terlebih dahulu!");
-        return;
-      }
-
-      ["A", "B", "C", "D", "E"].forEach(h => {
-        const el = document.getElementById(`btn-opsi-${h}`);
-        const badge = document.getElementById(`badge-opsi-${h}`);
-
-        if (el) {
-          if (h === kunci) {
-            el.className = "w-full text-left p-4 bg-emerald-50 border-2 border-emerald-500 rounded-2xl transition shadow-sm";
-            if(badge) badge.className = "w-7 h-7 rounded-lg bg-emerald-500 text-white flex items-center justify-center text-xs font-black shrink-0";
-          } else if (h === jwbUser && jwbUser !== kunci) {
-            el.className = "w-full text-left p-4 bg-rose-50 border-2 border-rose-500 rounded-2xl transition shadow-sm";
-            if(badge) badge.className = "w-7 h-7 rounded-lg bg-rose-500 text-white flex items-center justify-center text-xs font-black shrink-0";
-          } else {
-            el.className = "w-full text-left p-4 bg-slate-50 border border-slate-200 rounded-2xl opacity-60";
-          }
-        }
-      });
-
-      document.getElementById("latihan-teks-pembahasan").innerText = `Jawaban Anda: ${jwbUser || 'Tidak Diisi'}\nKunci Jawaban: ${kunci}\n\nPembahasan:\n${s.pembahasan || 'Tidak ada pembahasan khusus untuk soal ini.'}`;
-      
-      // Render Foto & Video Pembahasan
-      const mediaBox = document.getElementById("latihan-media-pembahasan");
-      mediaBox.innerHTML = "";
-
-      if(s.img_pembahasan) {
-        mediaBox.innerHTML += `<div class="rounded-xl overflow-hidden border bg-white p-2 text-center">
-          <img src="${s.img_pembahasan}" class="max-h-64 object-contain mx-auto rounded-lg" alt="Foto Pembahasan">
-        </div>`;
-      }
-
-      if(s.yt_link) {
-        const ytId = getYoutubeId(s.yt_link);
-        if(ytId) {
-          const start = s.yt_start || 0;
-          const end = s.yt_end ? `&end=${s.yt_end}` : "";
-          const embedUrl = `https://www.youtube.com/embed/${ytId}?start=${start}${end}&autoplay=1`;
-          mediaBox.innerHTML += `<div class="aspect-video w-full rounded-2xl overflow-hidden border shadow-sm">
-            <iframe class="w-full h-full" src="${embedUrl}" title="Video Pembahasan" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
-          </div>`;
-        }
-      }
-
-      document.getElementById("latihan-blok-pembahasan").classList.remove("hidden");
-    };
-
-    window.geserSoalSebelumnya = function() {
-      if (window.st.idx > 0) {
-        window.st.idx--;
-        tampilkanSoalLatihan();
-      }
-    };
-
-    window.geserLatihanLanjut = function() {
-      if (window.st.idx + 1 < window.st.soal.length) {
-        window.st.idx++;
-        tampilkanSoalLatihan();
-      } else {
-        if(window.st.jenis === "ujian") {
-          window.konfirmasiSelesaikanUjian();
-        } else {
-          window.bukaModalDialog("Selesai", "Anda telah menyelesaikan seluruh latihan dalam sesi ini!");
-          window.kembaliKeDash();
-        }
-      }
-    };
-
-    // KONFIRMASI DAN PROSES KELUAR HASIL UJIAN
-    window.konfirmasiSelesaikanUjian = function() {
-      const totalSoal = window.st.soal.length;
-      const dijawab = Object.keys(window.st.jwb).length;
-
-      let msg = `Anda telah menjawab ${dijawab} dari ${totalSoal} soal. Selesaikan ujian sekarang?`;
-      if (dijawab < totalSoal) {
-        msg = `Masih ada ${totalSoal - dijawab} soal yang belum Anda jawab!\nApakah Anda yakin ingin menyelesaikan ujian sekarang?`;
-      }
-
-      if (confirm(msg)) {
-        window.prosesProsesSelesaiUjian();
-      }
-    };
-
-    window.prosesProsesSelesaiUjian = function() {
-      if(window.st.timerInterval) clearInterval(window.st.timerInterval);
-
-      let benar = 0;
-      let salah = 0;
-
-      window.st.soal.forEach((s, i) => {
-        if(window.st.jwb[i] === s.jawaban) {
-          benar++;
-        } else {
-          salah++;
-        }
-      });
-
-      const bobotPerSoal = 5;
-      const skorDiperoleh = benar * bobotPerSoal;
-      const skorMaksimal = window.st.soal.length * bobotPerSoal;
-
-      const m = Math.floor(window.st.detikBerjalan / 60);
-      const s = window.st.detikBerjalan % 60;
-      const waktuFormatted = `${m < 10 ? '0'+m : m}:${s < 10 ? '0'+s : s}`;
-
-      document.getElementById("hasil-nama-paket").innerText = window.st.soal[0]?.paket || "Paket Ujian";
-      document.getElementById("hasil-skor-user").innerText = skorDiperoleh;
-      document.getElementById("hasil-skor-max").innerText = skorMaksimal;
-      document.getElementById("hasil-detail-jawaban").innerText = `Benar: ${benar} | Salah/Kosong: ${salah} | Total Soal: ${window.st.soal.length}`;
-      document.getElementById("hasil-total-waktu").innerText = `Total Waktu Pengerjaan: ${waktuFormatted}`;
-
-      document.getElementById("area-latihan-soal").classList.add("hidden");
-      document.getElementById("area-hasil-ujian").classList.remove("hidden");
-      window.pindahHalamanInternal("hasil-ujian");
-    };
-
-    // LIHAT PEMBAHASAN LENGKAP SEKALIGUS
-    window.mulaiLihatPembahasanUjian = function() {
-      const container = document.getElementById("list-pembahasan-container");
-      container.innerHTML = "";
-
-      document.getElementById("pembahasan-nama-paket").innerText = window.st.soal[0]?.paket || "Paket Ujian";
-
-      window.st.soal.forEach((s, idx) => {
-        const jwbUser = window.st.jwb[idx] || "Tidak Diisi";
-        const kunci = s.jawaban;
-        const isBenar = jwbUser === kunci;
-
-        // Gambar Pertanyaan
-        const imgSoalHtml = (s.gambar_soal && s.gambar_soal.trim() !== "") 
-          ? `<div class="rounded-xl bg-slate-50 border p-2 text-center mb-3">
-               <img src="${s.gambar_soal}" class="max-h-60 object-contain mx-auto rounded-lg" alt="Gambar Soal">
-             </div>` 
-          : "";
-
-        // Opsi A-E
-        let listOpsiHtml = "";
-        ["a", "b", "c", "d", "e"].forEach(k => {
-          const keyText = "opsi_" + k;
-          const keyImg = "img_" + k;
-          const huruf = k.toUpperCase();
-
-          if (s[keyText] && s[keyText].trim() !== "") {
-            const imgOpsi = (s[keyImg] && s[keyImg].trim() !== "") 
-              ? `<img src="${s[keyImg]}" class="mt-2 max-h-36 rounded-lg object-contain border" alt="Opsi ${huruf}">` 
-              : "";
-
-            let styleOpsi = "p-3 rounded-xl border text-xs bg-slate-50 text-slate-700";
-
-            if (huruf === kunci) {
-              styleOpsi = "p-3 rounded-xl border-2 border-emerald-500 bg-emerald-50 font-bold text-emerald-900";
-            } else if (huruf === jwbUser && !isBenar) {
-              styleOpsi = "p-3 rounded-xl border-2 border-rose-500 bg-rose-50 font-bold text-rose-900";
-            }
-
-            listOpsiHtml += `
-              <div class="${styleOpsi}">
-                 <div class="flex items-start gap-2">
-                    <span class="font-black">${huruf}.</span>
-                    <div>
-                       <p>${s[keyText]}</p>
-                       ${imgOpsi}
-                    </div>
-                 </div>
-              </div>`;
-          }
-        });
-
-        // Media Pembahasan Tambahan
-        let mediaPembahasanHtml = "";
-        if(s.img_pembahasan) {
-          mediaPembahasanHtml += `<div class="rounded-xl overflow-hidden border bg-white p-2 text-center mt-3">
-            <img src="${s.img_pembahasan}" class="max-h-64 object-contain mx-auto rounded-lg" alt="Foto Pembahasan">
-          </div>`;
-        }
-
-        if(s.yt_link) {
-          const ytId = getYoutubeId(s.yt_link);
-          if(ytId) {
-            const start = s.yt_start || 0;
-            const end = s.yt_end ? `&end=${s.yt_end}` : "";
-            const embedUrl = `https://www.youtube.com/embed/${ytId}?start=${start}${end}`;
-            mediaPembahasanHtml += `<div class="aspect-video w-full rounded-2xl overflow-hidden border shadow-sm mt-3">
-              <iframe class="w-full h-full" src="${embedUrl}" title="Video Pembahasan" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
-            </div>`;
-          }
-        }
-
-        // HTML untuk Per Soal di Pembahasan
-        container.innerHTML += `
-          <div class="bg-white rounded-3xl border border-slate-200 p-6 sm:p-8 space-y-4 shadow-sm">
-             <div class="flex items-center justify-between border-b pb-3">
-                <span class="font-black text-sm text-slate-800">Soal Nomor ${idx + 1}</span>
-                <span class="px-3 py-1 rounded-full text-[10px] font-black ${isBenar ? 'bg-emerald-100 text-emerald-800' : 'bg-rose-100 text-rose-800'}">
-                   ${isBenar ? 'SANGAT TEPAT (BENAR)' : 'KURANG TEPAT (SALAH)'}
-                </span>
-             </div>
-
-             ${imgSoalHtml}
-             <p class="text-sm font-medium text-slate-800 leading-relaxed whitespace-pre-line">${s.soal}</p>
-
-             <div class="space-y-2 pt-2">
-                <p class="text-[10px] font-black text-slate-400 uppercase">Pilihan Jawaban & Opsi:</p>
-                <div class="grid grid-cols-1 gap-2">${listOpsiHtml}</div>
-             </div>
-
-             <!-- KOTAK PEMBAHASAN -->
-             <div class="bg-indigo-50 border border-indigo-200 p-4 rounded-2xl space-y-1.5 mt-4">
-                <p class="text-xs font-black text-indigo-950 uppercase">💡 Kunci & Pembahasan Soal:</p>
-                <p class="text-xs text-indigo-900 leading-relaxed whitespace-pre-line"><b>Kunci Jawaban: ${kunci}</b> (Jawaban Anda: ${jwbUser})\n\n${s.pembahasan || 'Tidak ada pembahasan khusus untuk soal ini.'}</p>
-                ${mediaPembahasanHtml}
-             </div>
-          </div>`;
-      });
-
-      document.getElementById("area-hasil-ujian").classList.add("hidden");
-      document.getElementById("area-pembahasan-keseluruhan").classList.remove("hidden");
-      window.pindahHalamanInternal("pembahasan-keseluruhan");
-      window.scrollTo({ top: 0, behavior: 'smooth' });
-    };
-
-    // SUBMIT MATERI & INFORMASI
-    window.adminSubmitMateri = async function(e) {
-      e.preventDefault();
-      try {
-        window.bukaModalDialog("Mengunggah...", "Menyimpan materi PRO...");
-        await addDoc(collection(db, "materi"), {
-          judul: document.getElementById("adm-materi-judul").value,
-          isi: document.getElementById("adm-materi-isi").value,
-          createdAt: new Date().toISOString()
-        });
-        window.tutupModalDialog();
-        window.bukaModalDialog("Berhasil", "Materi PRO tersimpan!");
-      } catch(err) {
-        window.tutupModalDialog();
-        window.bukaModalDialog("Gagal", err.message);
-      }
-    };
-
-    window.adminSubmitInformasi = async function(e) {
-      e.preventDefault();
-      try {
-        window.bukaModalDialog("Mengunggah...", "Mempublikasikan informasi...");
-        await addDoc(collection(db, "informasi"), {
-          judul: document.getElementById("adm-info-judul").value,
-          teks: document.getElementById("adm-info-teks").value,
-          createdAt: new Date().toISOString()
-        });
-        window.tutupModalDialog();
-        window.bukaModalDialog("Berhasil", "Informasi dipublikasikan!");
-      } catch(err) {
-        window.tutupModalDialog();
-        window.bukaModalDialog("Gagal", err.message);
-      }
-    };
-
-    // KELOLA PESERTA
-    window.adminLoadDaftarPeserta = async function() {
-      const tbody = document.getElementById("adm-tabel-peserta-body");
-      tbody.innerHTML = `<tr><td colspan="5" class="py-4 text-center">Memuat data...</td></tr>`;
-      
-      const q = query(collection(db, "users"), where("role", "==", "peserta"));
-      const snap = await getDocs(q);
-      tbody.innerHTML = "";
-
-      snap.forEach(d => {
-        const data = d.data();
-        tbody.innerHTML += `
-          <tr class="hover:bg-slate-50">
-            <td class="py-3 px-4 font-bold">${data.nama || '-'}</td>
-            <td class="py-3 px-4">${data.email || '-'}</td>
-            <td class="py-3 px-4">${data.hp || '-'}</td>
-            <td class="py-3 px-4">
-              <span class="px-2 py-0.5 text-[10px] font-bold rounded ${data.tipe === 'pro' ? 'bg-amber-100 text-amber-800' : 'bg-slate-100 text-slate-600'}">${(data.tipe || 'free').toUpperCase()}</span>
-            </td>
-            <td class="py-3 px-4 text-center">
-              <button onclick="window.toggleStatusPro('${d.id}', '${data.tipe || 'free'}')" class="text-xs text-indigo-600 hover:underline font-bold">
-                ${data.tipe === 'pro' ? 'Ubah ke FREE' : 'Ubah ke PRO'}
-              </button>
-            </td>
-          </tr>`;
-      });
-    };
-
-    window.toggleStatusPro = async function(uid, statusSekarang) {
-      const tipeBaru = statusSekarang === 'pro' ? 'free' : 'pro';
-      await updateDoc(doc(db, "users", uid), { tipe: tipeBaru });
-      window.adminLoadDaftarPeserta();
-    };
-
-    // HELPER UI & MODAL DIALOG
-    window.pilihTabAuth = function(type) {
-      const formLog = document.getElementById("form-login");
-      const formReg = document.getElementById("form-daftar");
-      const btnLog = document.getElementById("tab-login-btn");
-      const btnReg = document.getElementById("tab-daftar-btn");
-
-      if (type === 'login') {
-        formLog.classList.remove("hidden");
-        formReg.classList.add("hidden");
-        btnLog.className = "flex-1 py-3 text-center text-xs font-black rounded-xl transition-all duration-200 bg-white shadow text-indigo-600";
-        btnReg.className = "flex-1 py-3 text-center text-xs font-black rounded-xl transition-all duration-200 text-slate-500 hover:text-slate-800";
-      } else {
-        formReg.classList.remove("hidden");
-        formLog.classList.add("hidden");
-        btnReg.className = "flex-1 py-3 text-center text-xs font-black rounded-xl transition-all duration-200 bg-white shadow text-emerald-600";
-        btnLog.className = "flex-1 py-3 text-center text-xs font-black rounded-xl transition-all duration-200 text-slate-500 hover:text-slate-800";
-      }
-    };
-
-    window.renderHeaderProfil = function() {
-      if(!window.uAktif) return;
-      document.getElementById("nama-peserta").innerText = window.uAktif.nama || "Peserta";
-      document.getElementById("badge-peserta").innerText = (window.uAktif.tipe || "free").toUpperCase() + " MEMBER";
-      document.getElementById("avatar-peserta").innerText = (window.uAktif.nama || "P").charAt(0).toUpperCase();
-    };
-
-    window.kembaliKeDash = function(isPopState = false) {
-      if(window.st.timerInterval) clearInterval(window.st.timerInterval);
-      
-      document.getElementById("area-pilih-paket").classList.add("hidden");
-      document.getElementById("area-latihan-soal").classList.add("hidden");
-      document.getElementById("area-hasil-ujian").classList.add("hidden");
-      document.getElementById("area-pembahasan-keseluruhan").classList.add("hidden");
-      document.getElementById("area-informasi").classList.add("hidden");
-      document.getElementById("area-materi").classList.add("hidden");
-
-      if(window.uAktif.role === "admin") {
-        document.getElementById("dash-admin").classList.remove("hidden");
-      } else {
-        document.getElementById("dash-peserta").classList.remove("hidden");
-      }
-
-      if (!isPopState) {
-        history.pushState({ view: "dashboard" }, "", "#dashboard");
-      }
-    };
-
-    window.bukaModalDialog = function(title, desc) {
-      document.getElementById("modal-title").innerText = title;
-      document.getElementById("modal-desc").innerText = desc;
-      document.getElementById("custom-modal").classList.remove("hidden");
-    };
-
-    window.tutupModalDialog = function() {
-      document.getElementById("custom-modal").classList.add("hidden");
-    };
-
-    window.bukaModalUpgrade = function() {
-      document.getElementById("modal-up").classList.remove("hidden");
-    };
-
-    window.tutupModalUpgrade = function() {
-      document.getElementById("modal-up").classList.add("hidden");
-    };
-
-    window.sinkronkanTipeAkun = async function() {
-      if(!window.uAktif) return;
-      window.bukaModalDialog("Memuat...", "Memperbarui status keanggotaan...");
-      const snap = await getDoc(doc(db, "users", window.uAktif.uid));
-      window.tutupModalDialog();
-      if(snap.exists()) {
-        window.uAktif.tipe = snap.data().tipe || "free";
-        window.renderHeaderProfil();
-        document.getElementById("dash-tipe-badge").innerText = (window.uAktif.tipe).toUpperCase();
-        window.bukaModalDialog("Status Diperbarui", `Keanggotaan Anda saat ini: ${(window.uAktif.tipe).toUpperCase()}`);
-      }
-    };
-
-    window.bukaMenuInformasi = async function() {
-      window.bukaModalDialog("Memuat...", "Mengambil pengumuman...");
-      const snap = await getDocs(collection(db, "informasi"));
-      window.tutupModalDialog();
-
-      const container = document.getElementById("list-informasi");
-      container.innerHTML = "";
-
-      if(snap.empty) {
-        container.innerHTML = "<p class='text-xs text-slate-400'>Belum ada pengumuman.</p>";
-      } else {
-        snap.forEach(d => {
-          const item = d.data();
-          container.innerHTML += `
-            <div class="bg-white p-6 rounded-3xl border border-slate-200 shadow-sm space-y-2">
-               <h3 class="font-black text-slate-800 text-sm">${item.judul}</h3>
-               <p class="text-xs text-slate-500 leading-relaxed whitespace-pre-line">${item.teks}</p>
-            </div>`;
-        });
-      }
-
-      document.getElementById("dash-peserta").classList.add("hidden");
-      document.getElementById("area-informasi").classList.remove("hidden");
-      window.pindahHalamanInternal("informasi");
-    };
-
-    window.bukaMenuMateri = async function() {
-      if(window.uAktif.tipe !== "pro") {
-        window.bukaModalUpgrade();
-        return;
-      }
-
-      window.bukaModalDialog("Memuat...", "Mengambil materi...");
-      const snap = await getDocs(collection(db, "materi"));
-      window.tutupModalDialog();
-
-      const container = document.getElementById("list-materi");
-      container.innerHTML = "";
-
-      if(snap.empty) {
-        container.innerHTML = "<p class='text-xs text-slate-400 col-span-full'>Belum ada materi PRO.</p>";
-      } else {
-        snap.forEach(d => {
-          const item = d.data();
-          container.innerHTML += `
-            <div class="bg-white p-6 rounded-3xl border border-slate-200 shadow-sm space-y-2">
-               <span class="px-2.5 py-0.5 bg-amber-100 text-amber-800 rounded-lg text-[9px] font-black uppercase">MATERI PRO</span>
-               <h3 class="font-black text-slate-800 text-base pt-1">${item.judul}</h3>
-               <p class="text-xs text-slate-500 leading-relaxed whitespace-pre-line">${item.isi}</p>
-            </div>`;
-        });
-      }
-
-      document.getElementById("dash-peserta").classList.add("hidden");
-      document.getElementById("area-materi").classList.remove("hidden");
-      window.pindahHalamanInternal("materi");
-    };
-  </script>
-</body>
-</html>
