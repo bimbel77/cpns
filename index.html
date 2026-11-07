@@ -237,12 +237,19 @@
 
           <form id="form-admin-soal" onsubmit="adminSubmitSoal(event)" class="space-y-4">
              <input type="hidden" id="adm-edit-id" value="">
-             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+             <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div>
                    <label class="block text-[10px] font-black text-slate-400 uppercase mb-1">Kategori / Jenis</label>
                    <select id="adm-soal-jenis" required class="w-full px-4 py-3 bg-slate-50 border rounded-2xl text-sm">
                       <option value="latihan">Latihan Mandiri</option>
                       <option value="ujian">Paket Ujian Simulasi</option>
+                   </select>
+                </div>
+                <div>
+                   <label class="block text-[10px] font-black text-slate-400 uppercase mb-1">Jenis Bobot Penilaian</label>
+                   <select id="adm-soal-tipe-skor" onchange="toggleSkorModeInput()" class="w-full px-4 py-3 bg-slate-50 border rounded-2xl text-sm font-bold">
+                      <option value="pilihan_ganda">1 Jawaban Benar (Skor 5)</option>
+                      <option value="skor_bertingkat">Skor Bertingkat (Poin 1 - 5 per Opsi)</option>
                    </select>
                 </div>
                 <div>
@@ -270,7 +277,12 @@
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                    <!-- OPSI A -->
                    <div class="space-y-1 bg-slate-50 p-3 rounded-2xl border">
-                      <input type="text" id="adm-soal-opsi-a" required class="w-full px-3 py-2 bg-white border rounded-xl text-sm" placeholder="Opsi A (Teks)">
+                      <div class="flex items-center justify-between gap-2">
+                         <input type="text" id="adm-soal-opsi-a" required class="w-full px-3 py-2 bg-white border rounded-xl text-sm" placeholder="Opsi A (Teks)">
+                         <div class="box-skor-opsi hidden w-28 shrink-0">
+                            <input type="number" id="adm-soal-poin-a" min="1" max="5" class="w-full px-2 py-2 bg-indigo-50 border border-indigo-300 rounded-xl text-xs font-bold text-center" placeholder="Poin (1-5)" value="5">
+                         </div>
+                      </div>
                       <label class="block text-[9px] font-bold text-slate-400 uppercase pt-1">Gambar Opsi A (Opsional)</label>
                       <input type="file" id="adm-soal-img-a-file" accept="image/*" class="w-full text-xs text-slate-500">
                       <input type="hidden" id="adm-soal-img-a-old" value="">
@@ -278,7 +290,12 @@
                    
                    <!-- OPSI B -->
                    <div class="space-y-1 bg-slate-50 p-3 rounded-2xl border">
-                      <input type="text" id="adm-soal-opsi-b" required class="w-full px-3 py-2 bg-white border rounded-xl text-sm" placeholder="Opsi B (Teks)">
+                      <div class="flex items-center justify-between gap-2">
+                         <input type="text" id="adm-soal-opsi-b" required class="w-full px-3 py-2 bg-white border rounded-xl text-sm" placeholder="Opsi B (Teks)">
+                         <div class="box-skor-opsi hidden w-28 shrink-0">
+                            <input type="number" id="adm-soal-poin-b" min="1" max="5" class="w-full px-2 py-2 bg-indigo-50 border border-indigo-300 rounded-xl text-xs font-bold text-center" placeholder="Poin (1-5)" value="4">
+                         </div>
+                      </div>
                       <label class="block text-[9px] font-bold text-slate-400 uppercase pt-1">Gambar Opsi B (Opsional)</label>
                       <input type="file" id="adm-soal-img-b-file" accept="image/*" class="w-full text-xs text-slate-500">
                       <input type="hidden" id="adm-soal-img-b-old" value="">
@@ -286,7 +303,12 @@
                    
                    <!-- OPSI C -->
                    <div class="space-y-1 bg-slate-50 p-3 rounded-2xl border">
-                      <input type="text" id="adm-soal-opsi-c" class="w-full px-3 py-2 bg-white border rounded-xl text-sm" placeholder="Opsi C (Teks)">
+                      <div class="flex items-center justify-between gap-2">
+                         <input type="text" id="adm-soal-opsi-c" class="w-full px-3 py-2 bg-white border rounded-xl text-sm" placeholder="Opsi C (Teks)">
+                         <div class="box-skor-opsi hidden w-28 shrink-0">
+                            <input type="number" id="adm-soal-poin-c" min="1" max="5" class="w-full px-2 py-2 bg-indigo-50 border border-indigo-300 rounded-xl text-xs font-bold text-center" placeholder="Poin (1-5)" value="3">
+                         </div>
+                      </div>
                       <label class="block text-[9px] font-bold text-slate-400 uppercase pt-1">Gambar Opsi C (Opsional)</label>
                       <input type="file" id="adm-soal-img-c-file" accept="image/*" class="w-full text-xs text-slate-500">
                       <input type="hidden" id="adm-soal-img-c-old" value="">
@@ -294,7 +316,12 @@
                    
                    <!-- OPSI D -->
                    <div class="space-y-1 bg-slate-50 p-3 rounded-2xl border">
-                      <input type="text" id="adm-soal-opsi-d" class="w-full px-3 py-2 bg-white border rounded-xl text-sm" placeholder="Opsi D (Teks)">
+                      <div class="flex items-center justify-between gap-2">
+                         <input type="text" id="adm-soal-opsi-d" class="w-full px-3 py-2 bg-white border rounded-xl text-sm" placeholder="Opsi D (Teks)">
+                         <div class="box-skor-opsi hidden w-28 shrink-0">
+                            <input type="number" id="adm-soal-poin-d" min="1" max="5" class="w-full px-2 py-2 bg-indigo-50 border border-indigo-300 rounded-xl text-xs font-bold text-center" placeholder="Poin (1-5)" value="2">
+                         </div>
+                      </div>
                       <label class="block text-[9px] font-bold text-slate-400 uppercase pt-1">Gambar Opsi D (Opsional)</label>
                       <input type="file" id="adm-soal-img-d-file" accept="image/*" class="w-full text-xs text-slate-500">
                       <input type="hidden" id="adm-soal-img-d-old" value="">
@@ -302,7 +329,12 @@
                    
                    <!-- OPSI E -->
                    <div class="space-y-1 bg-slate-50 p-3 rounded-2xl border md:col-span-2">
-                      <input type="text" id="adm-soal-opsi-e" class="w-full px-3 py-2 bg-white border rounded-xl text-sm" placeholder="Opsi E (Teks)">
+                      <div class="flex items-center justify-between gap-2">
+                         <input type="text" id="adm-soal-opsi-e" class="w-full px-3 py-2 bg-white border rounded-xl text-sm" placeholder="Opsi E (Teks)">
+                         <div class="box-skor-opsi hidden w-28 shrink-0">
+                            <input type="number" id="adm-soal-poin-e" min="1" max="5" class="w-full px-2 py-2 bg-indigo-50 border border-indigo-300 rounded-xl text-xs font-bold text-center" placeholder="Poin (1-5)" value="1">
+                         </div>
+                      </div>
                       <label class="block text-[9px] font-bold text-slate-400 uppercase pt-1">Gambar Opsi E (Opsional)</label>
                       <input type="file" id="adm-soal-img-e-file" accept="image/*" class="w-full text-xs text-slate-500">
                       <input type="hidden" id="adm-soal-img-e-old" value="">
@@ -311,11 +343,11 @@
              </div>
 
              <div class="grid grid-cols-1 md:grid-cols-2 gap-4 border-t border-slate-100 pt-4">
-                <div>
+                <div id="box-kunci-jawaban">
                    <label class="block text-[10px] font-black text-slate-400 uppercase mb-1">Kunci Jawaban (A/B/C/D/E)</label>
                    <input type="text" id="adm-soal-rules" required class="w-full px-4 py-3 bg-slate-50 border rounded-2xl text-sm uppercase" maxlength="1" placeholder="Contoh: A">
                 </div>
-                <div>
+                <div id="box-pembahasan-wrapper">
                    <label class="block text-[10px] font-black text-slate-400 uppercase mb-1">Pembahasan Soal (Teks)</label>
                    <textarea id="adm-soal-pembahasan" rows="2" class="w-full px-4 py-3 bg-slate-50 border rounded-2xl text-sm" placeholder="Teks pembahasan..."></textarea>
                 </div>
@@ -423,9 +455,9 @@
           <div class="bg-indigo-50 border border-indigo-200 p-4 rounded-2xl text-xs text-indigo-900 space-y-2">
              <p class="font-bold">📋 Format Header Kolom Excel / CSV:</p>
              <p class="font-mono text-[11px] bg-white p-2 rounded-lg border text-indigo-950 font-bold overflow-x-auto">
-                jenis | paket | soal | opsi_a | opsi_b | opsi_c | opsi_d | opsi_e | jawaban | pembahasan
+                jenis | paket | soal | opsi_a | opsi_b | opsi_c | opsi_d | opsi_e | jawaban | poin_a | poin_b | poin_c | poin_d | poin_e | pembahasan
              </p>
-             <p class="text-[10px] text-indigo-700">* Catatan: Isi kolom <b>jenis</b> dengan <code class="bg-indigo-100 px-1 rounded font-bold">latihan</code> atau <code class="bg-indigo-100 px-1 rounded font-bold">ujian</code>. Kolom <b>jawaban</b> diisi huruf kunci (<code class="bg-indigo-100 px-1 rounded font-bold">A/B/C/D/E</code>).</p>
+             <p class="text-[10px] text-indigo-700">* Catatan: Isi kolom <b>jenis</b> dengan <code class="bg-indigo-100 px-1 rounded font-bold">latihan</code> atau <code class="bg-indigo-100 px-1 rounded font-bold">ujian</code>. Kolom <b>poin_a s/d poin_e</b> opsional jika menggunakan soal bertingkat.</p>
           </div>
 
           <form onsubmit="adminImportExcel(event)" class="space-y-4">
@@ -578,7 +610,10 @@
           <!-- CONTAINER UTAMA SOAL -->
           <div id="container-soal-utama" class="lg:col-span-3 bg-white rounded-3xl border p-6 sm:p-8 space-y-6 shadow-sm">
              <div class="flex items-center justify-between border-b pb-4">
-                <span class="text-xs font-bold text-slate-400" id="latihan-no-soal">Soal Nomor -</span>
+                <div class="flex items-center gap-2">
+                   <span class="text-xs font-bold text-slate-400" id="latihan-no-soal">Soal Nomor -</span>
+                   <span id="badge-subtes-kategori" class="hidden px-2 py-0.5 rounded-md text-[10px] font-black uppercase"></span>
+                </div>
                 <span id="status-mode-tag" class="px-2.5 py-1 bg-emerald-50 text-emerald-700 rounded-lg text-[10px] font-black">Latihan Mandiri</span>
              </div>
 
@@ -638,8 +673,8 @@
     </div>
 
     <!-- AREA HASIL UJIAN -->
-    <div id="area-hasil-ujian" class="hidden max-w-xl mx-auto space-y-6">
-       <div class="bg-white rounded-3xl border border-slate-200 p-8 text-center space-y-6 shadow-lg">
+    <div id="area-hasil-ujian" class="hidden max-w-2xl mx-auto space-y-6">
+       <div class="bg-white rounded-3xl border border-slate-200 p-6 sm:p-8 text-center space-y-6 shadow-lg">
           <div class="w-20 h-20 bg-emerald-50 text-emerald-600 rounded-full flex items-center justify-center mx-auto text-4xl font-black">
              🏆
           </div>
@@ -648,14 +683,26 @@
              <p class="text-xs text-slate-400 mt-1" id="hasil-nama-paket">Paket Ujian</p>
           </div>
 
-          <div class="grid grid-cols-2 gap-4 bg-slate-50 p-4 rounded-2xl border">
-             <div class="space-y-1">
-                <span class="text-[10px] font-black text-slate-400 uppercase">Skor Diperoleh</span>
-                <p id="hasil-skor-user" class="text-2xl font-black text-indigo-600">0</p>
+          <div class="bg-slate-50 p-5 rounded-2xl border space-y-4">
+             <div class="flex justify-between items-center border-b pb-3">
+                <span class="text-xs font-black text-slate-500 uppercase">TOTAL SKOR KESELURUHAN</span>
+                <span id="hasil-skor-user" class="text-2xl font-black text-indigo-600">0</span>
              </div>
-             <div class="space-y-1 border-l">
-                <span class="text-[10px] font-black text-slate-400 uppercase">Skor Maksimal</span>
-                <p id="hasil-skor-max" class="text-2xl font-black text-slate-800">0</p>
+
+             <!-- SUB SKOR TWK, TIU, TKP -->
+             <div id="container-sub-skor" class="grid grid-cols-3 gap-2 text-left pt-1">
+                <div class="bg-white p-3 rounded-xl border border-slate-200">
+                   <p class="text-[9px] font-black text-slate-400 uppercase">TWK (1-30)</p>
+                   <p id="hasil-skor-twk" class="text-lg font-black text-blue-600">0</p>
+                </div>
+                <div class="bg-white p-3 rounded-xl border border-slate-200">
+                   <p class="text-[9px] font-black text-slate-400 uppercase">TIU (31-65)</p>
+                   <p id="hasil-skor-tiu" class="text-lg font-black text-amber-600">0</p>
+                </div>
+                <div class="bg-white p-3 rounded-xl border border-slate-200">
+                   <p class="text-[9px] font-black text-slate-400 uppercase">TKP (66-110)</p>
+                   <p id="hasil-skor-tkp" class="text-lg font-black text-purple-600">0</p>
+                </div>
              </div>
           </div>
 
@@ -835,6 +882,21 @@
           document.execCommand('insertImage', false, evt.target.result);
         };
         reader.readAsDataURL(file);
+      }
+    };
+
+    // TOGGLE FORM SKOR ADMIN
+    window.toggleSkorModeInput = function() {
+      const val = document.getElementById("adm-soal-tipe-skor").value;
+      const boxSkorList = document.querySelectorAll(".box-skor-opsi");
+      const boxKunci = document.getElementById("box-kunci-jawaban");
+
+      if (val === "skor_bertingkat") {
+        boxSkorList.forEach(el => el.classList.remove("hidden"));
+        if(boxKunci) boxKunci.classList.add("hidden");
+      } else {
+        boxSkorList.forEach(el => el.classList.add("hidden"));
+        if(boxKunci) boxKunci.classList.remove("hidden");
       }
     };
 
@@ -1287,6 +1349,8 @@
         window.bukaModalDialog("Memproses...", "Mengonversi dan menyimpan data...");
 
         const editId = document.getElementById("adm-edit-id").value;
+        const jenis = document.getElementById("adm-soal-jenis").value;
+        const paket = document.getElementById("adm-soal-paket").value.trim().toUpperCase();
 
         const newImgSoal = await convertFileToBase64("adm-soal-gambar-file");
         const newImgA = await convertFileToBase64("adm-soal-img-a-file");
@@ -1296,29 +1360,44 @@
         const newImgE = await convertFileToBase64("adm-soal-img-e-file");
 
         const newImgPembahasan = await convertFileToBase64("adm-soal-pembahasan-img-file");
+        const tipeSkor = document.getElementById("adm-soal-tipe-skor").value;
+
+        // Hitung nomor urut otomatis untuk paket ujian baru jika bukan mode edit
+        let nextNomorUrut = 1;
+        if (!editId) {
+          const qSoal = query(collection(db, "soal"), where("jenis", "==", jenis), where("paket", "==", paket));
+          const snapExisting = await getDocs(qSoal);
+          nextNomorUrut = snapExisting.size + 1;
+        }
 
         const payload = {
-          jenis: document.getElementById("adm-soal-jenis").value,
-          paket: document.getElementById("adm-soal-paket").value.trim().toUpperCase(),
+          jenis: jenis,
+          tipe_skor: tipeSkor,
+          paket: paket,
           soal: document.getElementById("adm-soal-teks").value,
           gambar_soal: newImgSoal || document.getElementById("adm-soal-gambar-old").value,
           
           opsi_a: document.getElementById("adm-soal-opsi-a").value,
           img_a: newImgA || document.getElementById("adm-soal-img-a-old").value,
+          poin_a: parseInt(document.getElementById("adm-soal-poin-a").value) || 0,
           
           opsi_b: document.getElementById("adm-soal-opsi-b").value,
           img_b: newImgB || document.getElementById("adm-soal-img-b-old").value,
+          poin_b: parseInt(document.getElementById("adm-soal-poin-b").value) || 0,
           
           opsi_c: document.getElementById("adm-soal-opsi-c").value || "",
           img_c: newImgC || document.getElementById("adm-soal-img-c-old").value,
+          poin_c: parseInt(document.getElementById("adm-soal-poin-c").value) || 0,
           
           opsi_d: document.getElementById("adm-soal-opsi-d").value || "",
           img_d: newImgD || document.getElementById("adm-soal-img-d-old").value,
+          poin_d: parseInt(document.getElementById("adm-soal-poin-d").value) || 0,
           
           opsi_e: document.getElementById("adm-soal-opsi-e").value || "",
           img_e: newImgE || document.getElementById("adm-soal-img-e-old").value,
+          poin_e: parseInt(document.getElementById("adm-soal-poin-e").value) || 0,
           
-          jawaban: document.getElementById("adm-soal-rules").value.toUpperCase(),
+          jawaban: tipeSkor === "skor_bertingkat" ? "" : document.getElementById("adm-soal-rules").value.toUpperCase(),
           pembahasan: document.getElementById("adm-soal-pembahasan").value || "",
           
           img_pembahasan: newImgPembahasan || document.getElementById("adm-soal-pembahasan-img-old").value || "",
@@ -1334,6 +1413,7 @@
           window.tutupModalDialog();
           window.bukaModalDialog("Berhasil", "Perubahan soal berhasil diperbarui!");
         } else {
+          payload.nomor_urut = nextNomorUrut;
           payload.createdAt = new Date().toISOString();
           await addDoc(collection(db, "soal"), payload);
           window.tutupModalDialog();
@@ -1404,6 +1484,10 @@
         if(item.yt_link) mediaText.push(`🎥 Video (${item.yt_start||0}s - ${item.yt_end||0}s)`);
         const mediaTag = mediaText.length > 0 ? mediaText.join("<br>") : "<span class='text-slate-300'>Teks saja</span>";
 
+        const labelKunci = item.tipe_skor === "skor_bertingkat" 
+          ? `<span class="text-xs text-purple-600 font-bold">1-5 Poin</span>` 
+          : item.jawaban;
+
         tbody.innerHTML += `
           <tr class="hover:bg-slate-50 border-b">
             <td class="py-3 px-3 text-center">
@@ -1413,7 +1497,7 @@
             <td class="py-3 px-3 font-bold text-indigo-900">${item.paket || 'TANPA PAKET'}</td>
             <td class="py-3 px-3 truncate max-w-xs">${item.soal}</td>
             <td class="py-3 px-3 text-[10px] font-medium text-slate-500">${mediaTag}</td>
-            <td class="py-3 px-3 font-black text-emerald-600">${item.jawaban}</td>
+            <td class="py-3 px-3 font-black text-emerald-600">${labelKunci}</td>
             <td class="py-3 px-3 text-center space-x-2">
                <button onclick="window.persiapkanEditSoal('${item.id}')" class="px-2.5 py-1 bg-amber-500 text-white rounded-lg text-[10px] font-bold hover:bg-amber-600 transition">Edit</button>
                <button onclick="window.hapusSoal('${item.id}')" class="px-2.5 py-1 bg-red-600 text-white rounded-lg text-[10px] font-bold hover:bg-red-700 transition">Hapus</button>
@@ -1489,24 +1573,30 @@
 
       document.getElementById("adm-edit-id").value = target.id;
       document.getElementById("adm-soal-jenis").value = target.jenis || "latihan";
+      document.getElementById("adm-soal-tipe-skor").value = target.tipe_skor || "pilihan_ganda";
       document.getElementById("adm-soal-paket").value = target.paket || "";
       document.getElementById("adm-soal-teks").value = target.soal || "";
 
       document.getElementById("adm-soal-gambar-old").value = target.gambar_soal || "";
       document.getElementById("adm-soal-opsi-a").value = target.opsi_a || "";
       document.getElementById("adm-soal-img-a-old").value = target.img_a || "";
+      document.getElementById("adm-soal-poin-a").value = target.poin_a ?? 5;
 
       document.getElementById("adm-soal-opsi-b").value = target.opsi_b || "";
       document.getElementById("adm-soal-img-b-old").value = target.img_b || "";
+      document.getElementById("adm-soal-poin-b").value = target.poin_b ?? 4;
 
       document.getElementById("adm-soal-opsi-c").value = target.opsi_c || "";
       document.getElementById("adm-soal-img-c-old").value = target.img_c || "";
+      document.getElementById("adm-soal-poin-c").value = target.poin_c ?? 3;
 
       document.getElementById("adm-soal-opsi-d").value = target.opsi_d || "";
       document.getElementById("adm-soal-img-d-old").value = target.img_d || "";
+      document.getElementById("adm-soal-poin-d").value = target.poin_d ?? 2;
 
       document.getElementById("adm-soal-opsi-e").value = target.opsi_e || "";
       document.getElementById("adm-soal-img-e-old").value = target.img_e || "";
+      document.getElementById("adm-soal-poin-e").value = target.poin_e ?? 1;
 
       document.getElementById("adm-soal-rules").value = target.jawaban || "A";
       document.getElementById("adm-soal-pembahasan").value = target.pembahasan || "";
@@ -1515,6 +1605,8 @@
       document.getElementById("adm-soal-yt-link").value = target.yt_link || "";
       document.getElementById("adm-soal-yt-start").value = target.yt_start || 0;
       document.getElementById("adm-soal-yt-end").value = target.yt_end || 0;
+
+      window.toggleSkorModeInput();
 
       document.getElementById("adm-soal-form-title").innerText = "Edit Soal (Mode Perubahan)";
       document.getElementById("btn-submit-soal").innerText = "SIMPAN PERUBAHAN SOAL";
@@ -1539,6 +1631,7 @@
       document.getElementById("adm-soal-form-title").innerText = "Tambah Soal Baru";
       document.getElementById("btn-submit-soal").innerText = "SIMPAN SOAL KE FIREBASE";
       document.getElementById("btn-batal-edit").classList.add("hidden");
+      window.toggleSkorModeInput();
     };
 
     window.hapusSoal = async function(id) {
@@ -1559,7 +1652,7 @@
       const sampleData = [
         {
           jenis: "latihan",
-          paket: "PAKET 1 - PEDAGOGIK",
+          paket: "PAKET 1 - CPNS INTEGRATED",
           soal: "Apa yang dimaksud dengan diferensiasi pembelajaran?",
           opsi_a: "Penyesuaian materi dengan kebutuhan peserta didik",
           opsi_b: "Metode ujian tanpa waktu",
@@ -1567,6 +1660,11 @@
           opsi_d: "Pemberian nilai secara acak",
           opsi_e: "Sistem penilaian terpusat",
           jawaban: "A",
+          poin_a: 5,
+          poin_b: 0,
+          poin_c: 0,
+          poin_d: 0,
+          poin_e: 0,
           pembahasan: "Diferensiasi pembelajaran menyesuaikan materi, proses, dan produk belajar dengan kebutuhan peserta didik."
         }
       ];
@@ -1611,7 +1709,9 @@
             return defaultVal;
           };
 
+          let indexSoal = 0;
           for (const item of jsonData) {
+            indexSoal++;
             let valJenis = getValue(item, ["jenis", "kategori", "type"], "latihan").toLowerCase();
             if (valJenis !== "ujian") valJenis = "latihan";
 
@@ -1624,23 +1724,35 @@
             const valOpsiD = getValue(item, ["opsi_d", "opsid", "d", "pilihan_d"]);
             const valOpsiE = getValue(item, ["opsi_e", "opsie", "e", "pilihan_e"]);
 
+            const pA = parseInt(getValue(item, ["poin_a", "poina"], "0")) || 0;
+            const pB = parseInt(getValue(item, ["poin_b", "poinb"], "0")) || 0;
+            const pC = parseInt(getValue(item, ["poin_c", "poinc"], "0")) || 0;
+            const pD = parseInt(getValue(item, ["poin_d", "poind"], "0")) || 0;
+            const pE = parseInt(getValue(item, ["poin_e", "poine"], "0")) || 0;
+
+            const isBertingkat = (pA > 0 || pB > 0 || pC > 0 || pD > 0 || pE > 0);
+            const tipeSkor = isBertingkat ? "skor_bertingkat" : "pilihan_ganda";
+
             let valJawaban = getValue(item, ["jawaban", "kunci", "kunci_jawaban", "key", "rules"], "A").toUpperCase();
             if (!["A", "B", "C", "D", "E"].includes(valJawaban)) {
               valJawaban = "A";
             }
 
             const valPembahasan = getValue(item, ["pembahasan", "discussion", "keterangan"]);
+            const valNomorUrut = parseInt(getValue(item, ["nomor_urut", "no_urut", "nomor", "no"], indexSoal.toString())) || indexSoal;
 
             await addDoc(collection(db, "soal"), {
               jenis: valJenis,
+              tipe_skor: tipeSkor,
               paket: valPaket,
+              nomor_urut: valNomorUrut,
               soal: valSoal,
               gambar_soal: "",
-              opsi_a: valOpsiA, img_a: "",
-              opsi_b: valOpsiB, img_b: "",
-              opsi_c: valOpsiC, img_c: "",
-              opsi_d: valOpsiD, img_d: "",
-              opsi_e: valOpsiE, img_e: "",
+              opsi_a: valOpsiA, img_a: "", poin_a: pA,
+              opsi_b: valOpsiB, img_b: "", poin_b: pB,
+              opsi_c: valOpsiC, img_c: "", poin_c: pC,
+              opsi_d: valOpsiD, img_d: "", poin_d: pD,
+              opsi_e: valOpsiE, img_e: "", poin_e: pE,
               jawaban: valJawaban,
               pembahasan: valPembahasan,
               img_pembahasan: "",
@@ -1802,6 +1914,14 @@
           usageData.count += list.length;
           localStorage.setItem(keyAkses, JSON.stringify(usageData));
         }
+      } else if (mode === "ujian") {
+        // Mengurutkan soal berdasarkan nomor_urut (atau tanggal dibuat jika nomor urut sama)
+        list.sort((a, b) => {
+          const noA = a.nomor_urut !== undefined ? a.nomor_urut : 999999;
+          const noB = b.nomor_urut !== undefined ? b.nomor_urut : 999999;
+          if (noA !== noB) return noA - noB;
+          return (a.createdAt || "").localeCompare(b.createdAt || "");
+        });
       }
 
       window.st.jenis = mode;
@@ -1857,13 +1977,32 @@
       if (!window.st.soal || window.st.soal.length === 0) return;
       window.st.idx = idx;
       const q = window.st.soal[idx];
+      const noUrut = idx + 1;
 
       // Sembunyikan blok pembahasan setiap kali pindah soal
       document.getElementById("latihan-blok-pembahasan").classList.add("hidden");
 
       // No Soal & Info Header
-      document.getElementById("latihan-no-soal").innerText = `Soal Nomor ${idx + 1} dari ${window.st.soal.length}`;
+      document.getElementById("latihan-no-soal").innerText = `Soal Nomor ${noUrut} dari ${window.st.soal.length}`;
       document.getElementById("latihan-info-judul").innerText = q.paket || "Soal";
+
+      // Kategori Subtes CPNS (TWK 1-30, TIU 31-65, TKP 66-110)
+      const badgeSubtes = document.getElementById("badge-subtes-kategori");
+      if (window.st.jenis === "ujian") {
+        badgeSubtes.classList.remove("hidden");
+        if (noUrut <= 30) {
+          badgeSubtes.innerText = "TWK (Tes Wawasan Kebangsaan)";
+          badgeSubtes.className = "px-2 py-0.5 rounded-md text-[10px] font-black uppercase bg-blue-100 text-blue-800";
+        } else if (noUrut <= 65) {
+          badgeSubtes.innerText = "TIU (Tes Intelegensia Umum)";
+          badgeSubtes.className = "px-2 py-0.5 rounded-md text-[10px] font-black uppercase bg-amber-100 text-amber-800";
+        } else {
+          badgeSubtes.innerText = "TKP (Tes Karakteristik Pribadi)";
+          badgeSubtes.className = "px-2 py-0.5 rounded-md text-[10px] font-black uppercase bg-purple-100 text-purple-800";
+        }
+      } else {
+        badgeSubtes.classList.add("hidden");
+      }
 
       // Gambar Soal
       const imgContainer = document.getElementById("latihan-gambar-container");
@@ -1946,12 +2085,23 @@
         return;
       }
 
-      const isCorrect = userAns === q.jawaban;
+      const isBertingkat = (q.tipe_skor === "skor_bertingkat");
+      const keyLow = userAns.toLowerCase();
+      const poinDiperoleh = isBertingkat ? (q[`poin_${keyLow}`] ?? 0) : (userAns === q.jawaban ? 5 : 0);
+
       const blokPembahasan = document.getElementById("latihan-blok-pembahasan");
       const teksPembahasan = document.getElementById("latihan-teks-pembahasan");
       const mediaPembahasan = document.getElementById("latihan-media-pembahasan");
 
-      teksPembahasan.innerText = `Jawaban Anda: ${userAns} (${isCorrect ? 'BENAR ✅' : 'SALAH ❌'})\nKunci Jawaban: ${q.jawaban}\n\n${q.pembahasan || 'Tidak ada pembahasan khusus untuk soal ini.'}`;
+      let infoSkorText = "";
+      if (isBertingkat) {
+        infoSkorText = `Jawaban Anda: ${userAns} (Poin Diperoleh: ${poinDiperoleh})\nRincian Bobot: A=${q.poin_a||0}, B=${q.poin_b||0}, C=${q.poin_c||0}, D=${q.poin_d||0}, E=${q.poin_e||0}`;
+      } else {
+        const isCorrect = userAns === q.jawaban;
+        infoSkorText = `Jawaban Anda: ${userAns} (${isCorrect ? 'BENAR ✅ Skor: 5' : 'SALAH ❌ Skor: 0'})\nKunci Jawaban: ${q.jawaban}`;
+      }
+
+      teksPembahasan.innerText = `${infoSkorText}\n\n${q.pembahasan || 'Tidak ada pembahasan khusus untuk soal ini.'}`;
 
       mediaPembahasan.innerHTML = "";
       if (q.img_pembahasan) {
@@ -2045,30 +2195,59 @@
     window.selesaikanUjian = function() {
       if (window.st.timerInterval) clearInterval(window.st.timerInterval);
 
+      let totalSkorUser = 0;
+      let skorTWK = 0;
+      let skorTIU = 0;
+      let skorTKP = 0;
       let benar = 0;
       let salah = 0;
       const totalSoal = window.st.soal.length;
 
       window.st.soal.forEach((q, i) => {
+        const noUrut = i + 1;
         const userAns = window.st.jwb[i];
-        if (userAns && userAns === q.jawaban) {
-          benar++;
+        let poin = 0;
+
+        if (userAns) {
+          if (q.tipe_skor === "skor_bertingkat") {
+            const keyLow = userAns.toLowerCase();
+            poin = q[`poin_${keyLow}`] ?? 0;
+          } else {
+            if (userAns === q.jawaban) {
+              poin = 5;
+              benar++;
+            } else {
+              salah++;
+            }
+          }
         } else {
           salah++;
         }
-      });
 
-      const skorMax = 100;
-      const skorUser = totalSoal > 0 ? Math.round((benar / totalSoal) * skorMax) : 0;
+        totalSkorUser += poin;
+
+        // Pembagian Kategori Subtes CPNS
+        if (noUrut <= 30) {
+          skorTWK += poin;
+        } else if (noUrut <= 65) {
+          skorTIU += poin;
+        } else if (noUrut <= 110) {
+          skorTKP += poin;
+        }
+      });
 
       const m = String(Math.floor(window.st.detikBerjalan / 60)).padStart(2, '0');
       const s = String(window.st.detikBerjalan % 60).padStart(2, '0');
 
       document.getElementById("hasil-nama-paket").innerText = window.st.soal[0]?.paket || "Paket Ujian";
-      document.getElementById("hasil-skor-user").innerText = skorUser;
-      document.getElementById("hasil-skor-max").innerText = skorMax;
-      document.getElementById("hasil-detail-jawaban").innerText = `Benar: ${benar} | Salah: ${salah} | Total Soal: ${totalSoal}`;
-      document.getElementById("hasil-total-waktu").innerText = `Total Waktu: ${m}:${s}`;
+      document.getElementById("hasil-skor-user").innerText = totalSkorUser;
+      
+      document.getElementById("hasil-skor-twk").innerText = skorTWK;
+      document.getElementById("hasil-skor-tiu").innerText = skorTIU;
+      document.getElementById("hasil-skor-tkp").innerText = skorTKP;
+
+      document.getElementById("hasil-detail-jawaban").innerText = `Terjawab: ${Object.keys(window.st.jwb).length} dari ${totalSoal} Soal`;
+      document.getElementById("hasil-total-waktu").innerText = `Total Waktu Mengerjakan: ${m}:${s}`;
 
       document.getElementById("area-latihan-soal").classList.add("hidden");
       document.getElementById("area-hasil-ujian").classList.remove("hidden");
@@ -2083,8 +2262,28 @@
       document.getElementById("pembahasan-nama-paket").innerText = window.st.soal[0]?.paket || "Paket Ujian";
 
       window.st.soal.forEach((q, i) => {
+        const noUrut = i + 1;
         const userAns = window.st.jwb[i] || "Tidak Dijawab";
-        const isCorrect = userAns === q.jawaban;
+        const isBertingkat = (q.tipe_skor === "skor_bertingkat");
+        let statusBadge = "";
+        let detailSkorUser = "";
+
+        if (isBertingkat) {
+          const keyLow = userAns.toLowerCase();
+          const poin = userAns !== "Tidak Dijawab" ? (q[`poin_${keyLow}`] ?? 0) : 0;
+          statusBadge = `<span class="px-2.5 py-1 rounded-lg text-[10px] font-black bg-purple-100 text-purple-800">POIN: ${poin}</span>`;
+          detailSkorUser = `<p><b>Skor Diperoleh:</b> <span class="text-purple-600 font-bold">${poin} Poin</span></p>
+                            <p><b>Bobot Opsi:</b> A=${q.poin_a||0}, B=${q.poin_b||0}, C=${q.poin_c||0}, D=${q.poin_d||0}, E=${q.poin_e||0}</p>`;
+        } else {
+          const isCorrect = userAns === q.jawaban;
+          statusBadge = `<span class="px-2.5 py-1 rounded-lg text-[10px] font-black ${isCorrect ? 'bg-emerald-100 text-emerald-800' : 'bg-red-100 text-red-800'}">${isCorrect ? 'BENAR (+5)' : 'SALAH (0)'}</span>`;
+          detailSkorUser = `<p><b>Kunci Jawaban:</b> <span class="text-emerald-600 font-bold">${q.jawaban}</span></p>`;
+        }
+
+        let categoryTag = "";
+        if (noUrut <= 30) categoryTag = "TWK";
+        else if (noUrut <= 65) categoryTag = "TIU";
+        else if (noUrut <= 110) categoryTag = "TKP";
 
         let imgSoalHtml = q.gambar_soal ? `<img src="${q.gambar_soal}" class="max-h-60 rounded-xl border mx-auto mb-3" />` : "";
         let imgPembahasanHtml = q.img_pembahasan ? `<img src="${q.img_pembahasan}" class="max-h-60 rounded-xl border mx-auto mt-2" />` : "";
@@ -2102,17 +2301,15 @@
         container.innerHTML += `
           <div class="bg-white p-6 rounded-3xl border border-slate-200 shadow-sm space-y-4">
             <div class="flex items-center justify-between border-b pb-3">
-              <span class="font-bold text-xs text-slate-500">Soal #${i + 1}</span>
-              <span class="px-2.5 py-1 rounded-lg text-[10px] font-black ${isCorrect ? 'bg-emerald-100 text-emerald-800' : 'bg-red-100 text-red-800'}">
-                ${isCorrect ? 'BENAR' : 'SALAH'}
-              </span>
+              <span class="font-bold text-xs text-slate-500">Soal #${noUrut} <span class="text-indigo-600">(${categoryTag})</span></span>
+              ${statusBadge}
             </div>
             ${imgSoalHtml}
             <p class="text-sm text-slate-800 font-medium whitespace-pre-line">${q.soal}</p>
 
             <div class="p-4 bg-slate-50 rounded-2xl text-xs space-y-1">
-              <p><b>Jawaban Anda:</b> <span class="${isCorrect ? 'text-emerald-600 font-bold' : 'text-red-600 font-bold'}">${userAns}</span></p>
-              <p><b>Kunci Jawaban:</b> <span class="text-emerald-600 font-bold">${q.jawaban}</span></p>
+              <p><b>Jawaban Anda:</b> <span class="font-bold text-indigo-600">${userAns}</span></p>
+              ${detailSkorUser}
             </div>
 
             <div class="p-4 bg-indigo-50/70 border border-indigo-200 rounded-2xl text-xs text-indigo-900 space-y-2">
