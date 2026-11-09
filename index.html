@@ -1779,20 +1779,18 @@
     window.bukaPilihPaket = async function(mode) {
       window.bukaModalDialog("Memuat...", "Membaca paket soal...");
       try {
-        const snap = await getDocs(collection(db, "soal"));
+        // DITAMBAHKAN FILTER WHERE JENIS UNTUK MENGHEMAT READS
+        const qPaket = query(collection(db, "soal"), where("jenis", "==", mode));
+        const snap = await getDocs(qPaket);
         window.tutupModalDialog();
 
         const paketMap = {};
 
         snap.forEach(d => {
           const item = { id: d.id, ...d.data() };
-          const itemJenis = item.jenis || "latihan";
-          
-          if(itemJenis === mode) {
-            const namaPaket = item.paket || "PAKET UMUM";
-            if(!paketMap[namaPaket]) paketMap[namaPaket] = [];
-            paketMap[namaPaket].push(item);
-          }
+          const namaPaket = item.paket || "PAKET UMUM";
+          if(!paketMap[namaPaket]) paketMap[namaPaket] = [];
+          paketMap[namaPaket].push(item);
         });
 
         const listContainer = document.getElementById("list-paket-container");
@@ -1869,15 +1867,14 @@
 
       window.bukaModalDialog("Menyiapkan...", "Mengambil butir soal...");
       
-      const snap = await getDocs(collection(db, "soal"));
+      // DITAMBAHKAN FILTER WHERE JENIS & PAKET UNTUK HANYA AMBIL SOAL TERKAIT
+      const qSpesifik = query(collection(db, "soal"), where("jenis", "==", mode), where("paket", "==", paketName));
+      const snap = await getDocs(qSpesifik);
       window.tutupModalDialog();
 
       let list = [];
       snap.forEach(d => {
-        const item = { id: d.id, ...d.data() };
-        if((item.jenis || "latihan") === mode && (item.paket || "PAKET UMUM") === paketName) {
-          list.push(item);
-        }
+        list.push({ id: d.id, ...d.data() });
       });
 
       if (list.length === 0) {
